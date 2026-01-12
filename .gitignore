@@ -1,0 +1,30 @@
+# Environment Variables
+.env
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Data
+data/pdfs/*
+data/questions.json
+*.pdf
+*.txt
+!requirements.txt
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# IDE Settings
+.vscode/
+.idea/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# OS specific
+.DS_Store
+Thumbs.db
