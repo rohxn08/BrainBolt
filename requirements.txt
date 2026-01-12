@@ -1,0 +1,12 @@
+python-dotenv
+pypdf
+google-search-results
+jupyter
+pandas
+streamlit
+langchain==1.2.0
+langchain-core==1.2.7
+langchain-community==0.4.1
+langchain-google-genai==4.1.3
+google-generativeai==0.8.5
+
