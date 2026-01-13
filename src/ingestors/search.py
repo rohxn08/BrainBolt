@@ -4,11 +4,12 @@ from langchain_community.tools import DuckDuckGoSearchRun
 from langchain_community.document_loaders import WebBaseLoader
 from langchain_community.utilities  import DuckDuckGoSearchAPIWrapper
 
+logger=logging.getLogger(__name__)
 class SearchIngestor(BaseIngestor):
     def __init__(self,num_results=3):
         self.num_results=num_results
         self.wrapper=DuckDuckGoSearchAPIWrapper(max_results=num_results)
-        self.tool=DuckDuckGoSearchRun(api_wrapper=self.wrapper)
+        
 
     #Loading method 
 
@@ -23,7 +24,9 @@ class SearchIngestor(BaseIngestor):
         logger.info(f"Found{urls} for {query}")
 
         try:
-            loader=WebBaseLoader(urls)
+            loader=WebBaseLoader(urls,header_template={
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                })
             docs=loader.load()
             full_text="\n".join([d.page_content for d in docs])
             return full_text
