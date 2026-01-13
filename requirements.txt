@@ -9,4 +9,6 @@ langchain-core==1.2.7
 langchain-community==0.4.1
 langchain-google-genai==4.1.3
 google-generativeai==0.8.5
+beautifulsoup4
+duckduckgo-search
 
