@@ -12,5 +12,5 @@ google-generativeai==0.8.5
 beautifulsoup4
 duckduckgo-search
 paddleocr
-paddlepaddle-cpu
+paddlepaddle
 
