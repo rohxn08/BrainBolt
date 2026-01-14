@@ -3,10 +3,15 @@ import os
 import subprocess
 import sys
 from .base import BaseIngestor
+import base64
+from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_core.messages import HumanMessage
 
 logger = logging.getLogger(__name__)
 
 class ImageIngestor(BaseIngestor):
+    def __init__(self,model_name="gemini-2.0-flash"):
+        self.llm=ChatGoogleGenerativeAI(model=model_name)
     def load(self, source: str) -> str:
         """
         Extracts text from an image using an isolated PaddleOCR process.
@@ -16,12 +21,11 @@ class ImageIngestor(BaseIngestor):
             logger.error(f"Image file not found: {source}")
             return ""
 
-        # Determine path to the isolated environment's Python
-        # Assumption: The .venv_ocr is in the project root
-        project_root = os.getcwd() # or traverse up if needed
+        
+        project_root = os.getcwd() 
         isolated_python = os.path.join(project_root, ".venv_ocr", "Scripts", "python.exe")
         
-        # Determine path to the tool script
+        
         script_path = os.path.join(project_root, "src", "tools", "ocr_isolated.py")
 
         if not os.path.exists(isolated_python):
@@ -37,7 +41,14 @@ class ImageIngestor(BaseIngestor):
                 text=True,
                 check=True
             )
-            return process.stdout.strip()
+            text = process.stdout.strip()
+            
+            # If OCR result is too sparse (likely a diagram/chart), use Vision Model
+            if len(text) < 50:
+                logger.info(f"OCR text length ({len(text)}) below threshold. Falling back to Gemini Vision.")
+                return self._analyze_with_gemini(source)
+                
+            return text
 
         except subprocess.CalledProcessError as e:
             logger.error(f"OCR failed: {e.stderr}")
@@ -45,3 +56,28 @@ class ImageIngestor(BaseIngestor):
         except Exception as e:
             logger.error(f"Unexpected error in OCR ingestor: {e}")
             return ""
+
+    def _analyze_with_gemini(self,image_path:str)->str:
+        try:
+            logger.info("Local OCR failed to give enough context switching to LLM")
+
+            with open(image_path,"rb") as image_file:
+                image_bytes=image_file.read()
+                encoded_bytes=base64.b64encode(image_bytes)
+                encoded_string=encoded_bytes.decode("utf-8")
+
+            message = HumanMessage(
+                content=[
+                    {"type": "text", "text": "This image contains a diagram, chart, or visual content. Please analyze it in detail, extracting any labels, data points, and explaining the visual concepts presented. The goal is to generate quiz questions based on this information."},
+                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{encoded_string}"}}
+                ]
+            )
+
+            response=self.llm.invoke([message])
+            return response.content
+        except Exception as e:
+            logger.error(f"Failed to analyze image with LLM: {e}")
+            return "Error analyzing the image with the LLM"
+
+
+
