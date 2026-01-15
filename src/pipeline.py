@@ -8,10 +8,10 @@ from .processors.summarizer import SummarizerProcessor
 logger=logging.getLogger(__name__)
 
 class BrainBoltPipeline:
-    def __init__(self):
-        self.image_ingestor=ImageIngestor()
-        self.youtube_ingestor=YouTubeIngestor()
-        self.summarizer=SummarizerProcessor()
+    def __init__(self, model_name="gemini-2.0-flash"):
+        self.image_ingestor = ImageIngestor(model_name=model_name)
+        self.youtube_ingestor = YouTubeIngestor()
+        self.summarizer = SummarizerProcessor(model_name=model_name)
 
     def process(self,source:str, task:str="summarize", **kwargs):
         logger.info(f"Prcoessing {source} for {task}")
