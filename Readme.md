@@ -46,6 +46,6 @@ BrainBolt is a multimodal learning assistant that transforms various content typ
 
 - [x] Image Ingestion (Hybrid OCR/Vision)
 - [x] YouTube Ingestion
-- [ ] Summarization Processor
+- [x] Summarization Processor
 - [ ] FastAPI Backend
 - [ ] Streamlit UI
