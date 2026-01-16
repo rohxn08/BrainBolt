@@ -3,6 +3,7 @@ import os
 from .ingestors.image import ImageIngestor
 from .ingestors.youtube import YouTubeIngestor
 from .processors.summarizer import SummarizerProcessor
+from .processors.quiz_generator import QuizGeneratorProcessor
 
 
 logger=logging.getLogger(__name__)
@@ -12,6 +13,7 @@ class BrainBoltPipeline:
         self.image_ingestor = ImageIngestor(model_name=model_name)
         self.youtube_ingestor = YouTubeIngestor()
         self.summarizer = SummarizerProcessor(model_name=model_name)
+        self.quiz_generator=QuizGeneratorProcessor(model_name=model_name)
 
     def process(self,source:str, task:str="summarize", **kwargs):
         logger.info(f"Prcoessing {source} for {task}")
@@ -24,9 +26,16 @@ class BrainBoltPipeline:
 
             return {"result":result,
             "source_text_length":len(content_text)}
-        else:
-            return {"error": f"Unsupported task:{task}"}
-        
+        elif task=="quiz":
+            num_q=kwargs.get("num_questions",5)
+            diff=kwargs.get("difficulty","medium")
+            result = self.quiz_generator.generate_quiz(content_text, num_questions=num_q, difficulty=diff)
+            return {
+                "result": result,
+                "source_text_length": len(content_text)
+            }
+        else: 
+            return {"error":"Invalid task"}
     def _ingest(self,source:str)->str:
         if "youtube.com" in source or "youtu.be" in source:
             return self.youtube_ingestor.load(source)
