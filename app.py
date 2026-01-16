@@ -7,8 +7,8 @@ from src.utils import list_available_models
 
 # --- Page Configuration ---
 st.set_page_config(
-    page_title="BrainBolt ⚡",
-    page_icon="⚡",
+    page_title="BrainBolt",
+    page_icon="B",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -35,7 +35,7 @@ st.markdown("""
 
 # --- Sidebar: Configuration ---
 with st.sidebar:
-    st.title("⚡ BrainBolt")
+    st.title("BrainBolt")
     st.markdown("---")
     
     # API Key Handling
@@ -60,18 +60,15 @@ with st.sidebar:
         selected_model = None
 
     st.markdown("---")
-    st.markdown("### Settings")
-    summary_type = st.selectbox(
-        "Summary Style",
-        ["concise", "detailed", "educational", "bullet_points", "executive", "exam_ready"]
-    )
+    # Settings moved to main area
+    # st.markdown("### Settings")
 
 # --- Main Content ---
-st.title("Unlock Knowledge ⚡")
+st.title("Unlock Knowledge")
 st.markdown("Transform **Videos, Images, and Text** into clear summaries.")
 
 # Input Method Tabs
-tab1, tab2, tab3 = st.tabs(["📺 YouTube", "📷 Image", "📝 Text/File"])
+tab1, tab2, tab3 = st.tabs(["YouTube", "Image", "Text/File"])
 
 source = None
 input_type = None
@@ -111,32 +108,91 @@ with tab3:
         input_type = "text"
 
 # --- Process Button ---
-if st.button("⚡ Generate Summary"):
-    if not current_key:
-        st.error("❌ Please provide a Google API Key in the sidebar.")
-    elif not source:
-        st.warning("⚠️ Please provide an input source (URL or Image).")
-    else:
-        try:
-            with st.spinner("Processing... (This may take a moment)"):
-                # Initialize Pipeline
-                pipeline = BrainBoltPipeline()
-                
-                # Run Processing
-                # Note: We aren't passing specific model yet, Pipeline uses default. 
-                # We can update Pipeline later to accept model_name.
-                result = pipeline.process(source, task="summarize", summary_type=summary_type)
-                
-                if "error" in result:
-                    st.error(f"❌ Error: {result['error']}")
-                else:
-                    st.success("Analysis Complete!")
-                    st.markdown("### 📝 Summary")
-                    st.markdown("---")
-                    st.markdown(result['result'])
-                    st.markdown("---")
-                    st.caption(f"Source Length: {result['source_text_length']} characters")
-                    
-        except Exception as e:
-            st.error(f"An unexpected error occurred: {e}")
+# --- Mode Selection ---
+st.markdown("---")
+col1, col2 = st.columns([1, 2])
 
+with col1:
+    st.markdown("###  Configuration")
+    mode = st.radio("Select Mode", ["Summarizer", "Quiz Generator"], horizontal=True)
+
+    if mode == "Summarizer":
+        summary_type = st.selectbox(
+            "Summary Style",
+            ["concise", "detailed", "educational", "bullet_points", "executive", "exam_ready"]
+        )
+    else:
+        num_questions = st.slider("Number of Questions", 1, 10, 5)
+        difficulty = st.select_slider("Difficulty", options=["Easy", "Medium", "Hard"], value="Medium")
+
+with col2:
+    st.markdown("###  Action")
+    if st.button(f"Generate {mode}", use_container_width=True):
+        if not current_key:
+            st.error("Please provide a Google API Key in the sidebar.")
+        elif not source:
+            st.warning("Please provide an input source (URL, Image, or Text).")
+        else:
+            try:
+                with st.spinner(f"Running {mode}..."):
+                    # Initialize Pipeline
+                    pipeline = BrainBoltPipeline(api_key=current_key, model_name=selected_model)
+                    
+                    if mode == "Summarizer":
+                        result = pipeline.process(source, task="summarize", summary_type=summary_type)
+                        
+                        if "error" in result:
+                            st.error(f"Error: {result['error']}")
+                        else:
+                            st.success("Analysis Complete!")
+                            st.markdown("### Summary")
+                            st.markdown("---")
+                            st.markdown(result['result'])
+                            st.markdown("---")
+                            st.caption(f"Source Length: {result['source_text_length']} characters")
+                            
+                    elif mode == "Quiz Generator":
+                        result = pipeline.process(source, task="quiz", num_questions=num_questions, difficulty=difficulty)
+                        
+                        if "error" in result:
+                            st.error(f"Error: {result['error']}")
+                        else:
+                            st.success("Quiz Generated!")
+                            st.markdown("### Quiz Time")
+                            st.markdown("---")
+                            
+                            quiz_data = result['result']
+                            if not quiz_data:
+                                st.warning("No questions generated. Try a different text.")
+                            else:
+                                # Render Interactive Quiz
+                                for i, q in enumerate(quiz_data):
+                                    st.markdown(f"#### Q{i+1}: {q.get('question', 'Question missing')}")
+                                    
+                                    options = q.get('options', [])
+                                    correct_ans = q.get('correct_answer', '')
+                                    explanation = q.get('explanation', '')
+                                    
+                                    # Use a unique key for each question's radio button
+                                    selected_opt = st.radio(
+                                        "Select an answer:", 
+                                        options, 
+                                        key=f"q_{i}", 
+                                        index=None
+                                    )
+                                    
+                                    # Local reveal button for each question
+                                    # Note: Streamlit re-runs on every interaction, so this simple logic works
+                                    if selected_opt:
+                                        if selected_opt == correct_ans:
+                                            st.success("Correct!")
+                                        else:
+                                            st.error(f"Incorrect. Answer: {correct_ans}")
+                                        
+                                        with st.expander("View Explanation"):
+                                            st.write(explanation)
+                                    
+                                    st.markdown("---")
+
+            except Exception as e:
+                st.error(f"An unexpected error occurred: {e}")
