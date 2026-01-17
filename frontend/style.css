@@ -1,0 +1,1630 @@
+:root {
+    /* Updated Palette */
+    --primary-red: #F8311C;
+    /* Signal Red */
+    --text-white: #FFFFFF;
+    --text-black: #150E0E;
+    /* Midnight Black */
+    --text-gray: #6B6B6B;
+    /* Steel Gray */
+    --card-bg: #F0F0F0;
+
+    /* Fonts definition */
+    --font-primary: 'Akony', 'Syne', sans-serif;
+    --font-secondary: 'Space Grotesk', sans-serif;
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background-color: var(--primary-red);
+    font-family: var(--font-secondary);
+    color: var(--text-white);
+    overflow-x: hidden;
+}
+
+/* Layout */
+.main-container {
+    width: 100%;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+/* Navbar - Using Space Grotesk */
+.navbar {
+    width: 100%;
+
+    /* Fixed Positioning */
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+
+    /* Layout */
+    display: flex;
+    justify-content: center;
+    /* Centers the inner container */
+    padding: 2rem 0;
+    /* Vertical padding only */
+    box-sizing: border-box;
+
+    color: var(--text-black);
+}
+
+.nav-inner {
+    width: 90%;
+    max-width: 1800px;
+    /* Exact match to Hero & API Bar */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-menu a {
+    color: var(--text-black);
+    text-decoration: none;
+    margin: 0 1rem;
+    font-family: var(--font-secondary);
+    font-size: 16px;
+    /* Recommended 14-16px for UI Labels */
+    font-weight: 500;
+    letter-spacing: 0.5px;
+}
+
+/* Hero Typography */
+.hero {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    /* Align to top */
+    align-items: center;
+    position: relative;
+    width: 100%;
+    padding-top: 0px;
+    padding-bottom: 0;
+}
+
+h1 {
+    font-family: var(--font-primary);
+    /* "Used at an extreme scale" - reduced per instruction */
+    font-size: 16vw;
+    font-weight: 800;
+    /* Bold Display */
+    line-height: 0.8;
+    margin: 0;
+    text-transform: uppercase;
+    width: 100%;
+    text-align: center;
+    letter-spacing: -0.02em;
+    /* Akony has sharp angles, no scale stretch needed if the font is real Akony. 
+       If falling back to Syne, it looks good as is. */
+}
+
+/* Top Section (Red BG, White Text) */
+.hero-top {
+    width: 100%;
+    height: 38vh;
+    /* Adjusted to 38vh to sit just below navbar without colliding */
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: visible;
+    /* visible ensures we don't accidentally clip ascenders */
+    z-index: 1;
+}
+
+.hero-top h1 {
+    color: var(--text-white);
+    position: relative;
+    z-index: 10;
+    margin-bottom: -1.7vw;
+    /* Adjusted overlay slightly */
+}
+
+/* Card Section (Black Gradient Card) */
+.hero-card {
+    width: 90%;
+    max-width: 1800px;
+    height: 75vh;
+    /* Subtle spotlight gradient */
+    background: radial-gradient(circle at center, #1a1a1a 0%, #000000 80%);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    z-index: 20;
+    /* Layer on top */
+}
+
+.card-content {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    z-index: 2;
+}
+
+/* Main BOLT text */
+.inverse-text {
+    background: linear-gradient(to bottom, var(--primary-red) 20%, #500000 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    /* Fixed Lint */
+    -webkit-text-fill-color: transparent;
+    position: relative;
+    /* Sit behind the floating stats */
+    margin-top: 0;
+    /* Removed negative margin to keep top border visible */
+    max-width: 100%;
+    overflow: hidden;
+}
+
+.left-content {
+    position: absolute;
+    bottom: 4rem;
+    left: 4rem;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+}
+
+.right-content {
+    position: absolute;
+    bottom: 4rem;
+    right: 4rem;
+    text-align: right;
+}
+
+/* Typography for new elements */
+.stat-big {
+    font-family: var(--font-primary);
+    font-size: 8rem;
+    font-weight: 800;
+    color: var(--primary-red);
+    line-height: 0.8;
+}
+
+.stat-label {
+    font-family: var(--font-secondary);
+    color: var(--text-white);
+    font-size: 14px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-top: 0.5rem;
+}
+
+.vision-text {
+    font-family: var(--font-primary);
+    /* Use the wide font */
+    font-size: 4rem;
+    line-height: 0.9;
+    color: var(--text-white);
+    text-transform: uppercase;
+    font-weight: 800;
+}
+
+.cta-button {
+    background: #FFFFFF;
+    color: #000000;
+    border: none;
+    padding: 1rem 2rem;
+    font-family: var(--font-secondary);
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+    cursor: pointer;
+    margin-top: 1rem;
+    transition: transform 0.2s ease;
+}
+
+.cta-button:hover {
+    transform: scale(1.05);
+}
+
+
+
+.stat-block {
+    margin-bottom: 2rem;
+}
+
+.stat-number {
+    display: block;
+    /* "Section Headers: 50px - 90px" */
+    font-size: 70px;
+    font-weight: 700;
+    font-family: var(--font-secondary);
+    color: var(--primary-red);
+    line-height: 1;
+}
+
+.stat-label {
+    /* "Body Text: 14px to 18px" */
+    font-size: 16px;
+    font-weight: 500;
+    text-transform: uppercase;
+    display: block;
+    margin-top: 5px;
+}
+
+.card-description {
+    font-family: var(--font-secondary);
+    font-size: 16px;
+    font-weight: 400;
+    /* Regular */
+    margin-bottom: 2rem;
+    line-height: 1.5;
+    opacity: 0.9;
+}
+
+.cta-button {
+    background: transparent;
+    border: 2px solid var(--text-white);
+    /* White border */
+    padding: 1rem 2.5rem;
+    font-family: var(--font-secondary);
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--text-white);
+    /* White text */
+}
+
+.cta-button:hover {
+    background: var(--text-white);
+    color: black;
+}
+
+.decorative-tagline {
+    position: absolute;
+    bottom: 3rem;
+    right: 4rem;
+    text-align: right;
+
+    font-family: var(--font-secondary);
+    /* "Subheaders or Section styling" */
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--text-white);
+    /* White text */
+    text-transform: uppercase;
+}
+
+/* NO BACKGROUND IMAGE FOR CARD */
+.card-image-bg {
+    display: none;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    h1 {
+        font-size: 20vw;
+    }
+
+    .hero-card {
+        width: 100%;
+        padding-bottom: 2rem;
+    }
+
+    .card-details {
+        position: relative;
+        left: 0;
+        bottom: 0;
+        padding: 2rem;
+        max-width: 100%;
+    }
+
+    .decorative-tagline {
+        display: none;
+    }
+
+    .main-container {
+        padding-top: 60px;
+        /* Space for navbar */
+    }
+}
+
+/* Neural Grid Section */
+.features-section {
+    width: 100%;
+    min-height: 80vh;
+    background-color: var(--primary-red);
+    /* Signal Red */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    /* Push content to top */
+    padding: 0 0 4rem 0;
+}
+
+.bento-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 2rem;
+    width: 90%;
+    max-width: 1800px;
+    /* Aligned with Hero & API Bar */
+    height: 60vh;
+}
+
+.bento-card {
+    /* Same Black Gradient as Hero */
+    background: radial-gradient(circle at center, #1a1a1a 0%, #000000 80%);
+    border: 1px solid var(--text-gray);
+    /* Steel Gray Border */
+    border-radius: 4px;
+    padding: 2.5rem;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    box-shadow: 0 0 15px rgba(248, 49, 28, 0.1);
+}
+
+.bento-card:hover {
+    box-shadow: 0 0 25px rgba(248, 49, 28, 0.3);
+    transform: translateY(-5px);
+}
+
+/* Card Specifics */
+.card-ingest {
+    grid-row: span 2;
+    /* Takes full height on left */
+    /* Background unified with bento-card */
+}
+
+.card-summary {
+    border-left: 4px solid var(--text-white);
+}
+
+.card-quiz {
+    border-left: 4px solid var(--primary-red);
+}
+
+/* Typography */
+.card-title {
+    font-family: var(--font-primary);
+    font-size: 2rem;
+    margin: 0;
+    letter-spacing: -0.01em;
+    background: linear-gradient(to bottom, #F8311C 0%, #aa2016 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+}
+
+.card-desc {
+    font-family: var(--font-secondary);
+    color: var(--text-gray);
+    font-size: 1rem;
+    line-height: 1.5;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+/* Icons */
+.icon-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+    color: var(--primary-red);
+}
+
+/* Status Dots */
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-bottom: 1rem;
+}
+
+.status-dot.white {
+    background-color: var(--text-white);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.status-dot.red {
+    background-color: var(--primary-red);
+    box-shadow: 0 0 10px rgba(248, 49, 28, 0.5);
+}
+
+/* Scan Line Animation for Ingest Card */
+.scan-line {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: var(--primary-red);
+    box-shadow: 0 0 15px var(--primary-red);
+    opacity: 0.5;
+    animation: scan 3s infinite linear;
+}
+
+@keyframes scan {
+    0% {
+        top: 0;
+        opacity: 0;
+    }
+
+    10% {
+        opacity: 1;
+    }
+
+    90% {
+        opacity: 1;
+    }
+
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+/* Responsiveness */
+@media (max-width: 1024px) {
+    .bento-grid {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto;
+        height: auto;
+    }
+
+    .card-ingest {
+        grid-row: auto;
+        height: 300px;
+    }
+}
+
+/* Modal Styles */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(5px);
+}
+
+.modal.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    width: 80%;
+    height: 80%;
+    background: var(--primary-red);
+    /* Signal Red Background */
+    border: 1px solid #000;
+    display: flex;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    animation: scaleIn 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes scaleIn {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.close-modal {
+    position: absolute;
+    top: 1rem;
+    right: 1.5rem;
+    background: none;
+    border: none;
+    color: #000;
+    /* Black close button */
+    font-size: 2rem;
+    cursor: pointer;
+    z-index: 10;
+    transition: transform 0.3s ease;
+}
+
+.close-modal:hover {
+    transform: rotate(90deg);
+}
+
+/* Sidebar */
+.modal-sidebar {
+    width: 300px;
+    background: transparent;
+    border-right: 1px solid #000;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-title {
+    font-family: var(--font-primary);
+    color: #000;
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    letter-spacing: 1px;
+}
+
+.mode-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.mode-btn {
+    background: #000;
+    border: 1px solid #000;
+    color: var(--text-gray);
+    padding: 1rem;
+    text-align: left;
+    font-family: var(--font-secondary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+}
+
+.mode-btn:hover {
+    color: var(--text-white);
+    transform: translateX(5px);
+    background: #111;
+}
+
+.mode-btn.active {
+    background: #000;
+    color: var(--text-white);
+    border-color: #000;
+    font-weight: bold;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Main View (Output) */
+.modal-main {
+    flex: 1;
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    background: transparent;
+    /* Red background from parent */
+}
+
+.output-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #000;
+    padding-bottom: 1rem;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    background: #000;
+    /* Black dot */
+    border-radius: 50%;
+}
+
+.output-title {
+    font-family: var(--font-primary);
+    color: #000;
+    /* Black Header */
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.output-console {
+    flex: 1;
+    font-family: var(--font-secondary);
+    color: #000;
+    /* Black Output Text */
+    font-size: 1rem;
+    line-height: 1.6;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    font-weight: 600;
+    /* Bolder */
+}
+
+.placeholder-text {
+    opacity: 0.6;
+    font-style: italic;
+    color: #333;
+}
+
+.output-content {
+    color: #000;
+}
+
+/* Responsive Modal */
+@media (max-width: 768px) {
+    .modal-content {
+        flex-direction: column;
+        width: 100%;
+        height: 100%;
+        border: none;
+    }
+
+    .modal-sidebar {
+        width: 100%;
+        height: auto;
+        padding: 1rem;
+        flex-direction: row;
+        overflow-x: auto;
+    }
+
+    .main-view {
+        padding: 1rem;
+    }
+}
+
+/* =========================================
+   QUIZ GENERATOR STYLES
+   ========================================= */
+
+/* Quiz Modal Specifics */
+.quiz-theme {
+    background: #150E0E;
+    /* Midnight Black Background for difference */
+    color: var(--text-white);
+    border: 1px solid var(--primary-red);
+}
+
+.quiz-theme .sidebar-title,
+.quiz-theme .control-label,
+.quiz-theme .output-title {
+    color: var(--text-white);
+}
+
+.quiz-theme .modal-sidebar {
+    border-right: 1px solid var(--primary-red);
+    background: rgba(255, 255, 255, 0.02);
+    /* Subtle contrast */
+    width: 320px;
+}
+
+.quiz-theme .close-modal {
+    color: var(--text-white);
+}
+
+.quiz-output-container {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Control Groups */
+.control-group {
+    margin-bottom: 2rem;
+}
+
+.control-label {
+    font-family: var(--font-secondary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    margin-bottom: 0.8rem;
+    display: block;
+    color: var(--text-gray);
+    letter-spacing: 1px;
+}
+
+/* Difficulty Selector - Segmented Control */
+.difficulty-selector {
+    display: flex;
+    border: 1px solid var(--text-gray);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.diff-btn {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: var(--text-gray);
+    padding: 0.8rem;
+    cursor: pointer;
+    font-family: var(--font-secondary);
+    font-weight: 600;
+    transition: all 0.2s;
+    border-right: 1px solid var(--text-gray);
+}
+
+.diff-btn:last-child {
+    border-right: none;
+}
+
+.diff-btn.active {
+    background: var(--primary-red);
+    color: white;
+}
+
+.diff-btn:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+/* Rotation Animation for Loader */
+@keyframes spin {
+    from {
+        transform: rotate(0deg);
+    }
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
+/* Custom Range Slider */
+.ui-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    /* Fixed Lint: Added standard property */
+    width: 100%;
+    height: 6px;
+    background: #333;
+    border-radius: 3px;
+    outline: none;
+}
+
+.ui-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary-red);
+    cursor: pointer;
+    border: 2px solid white;
+    box-shadow: 0 0 10px rgba(248, 49, 28, 0.5);
+}
+
+.slider-ticks {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 5px;
+    color: var(--text-gray);
+    font-size: 0.7rem;
+    font-family: var(--font-secondary);
+}
+
+/* Inputs & Selects */
+.ui-input,
+.custom-select select {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--text-gray);
+    color: white;
+    padding: 0.8rem;
+    font-family: var(--font-secondary);
+    font-size: 0.9rem;
+    border-radius: 4px;
+    outline: none;
+}
+
+.ui-input:focus,
+.custom-select select:focus {
+    border-color: var(--primary-red);
+}
+
+.custom-select {
+    position: relative;
+}
+
+.custom-select select {
+    appearance: none;
+    cursor: pointer;
+}
+
+/* Fix for Dropdown Options */
+.custom-select option {
+    background-color: #150E0E;
+    /* Midnight Black */
+    color: var(--text-white);
+    padding: 10px;
+}
+
+/* Generate Button */
+.generate-btn {
+    width: 100%;
+    padding: 1rem;
+    background: var(--primary-red);
+    color: white;
+    border: none;
+    font-family: var(--font-secondary);
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    margin-top: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 0.5rem;
+    transition: transform 0.2s;
+    text-transform: uppercase;
+}
+
+.generate-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(248, 49, 28, 0.4);
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    color: var(--text-gray);
+    margin-top: 4rem;
+    opacity: 0.5;
+}
+
+.empty-state p {
+    font-family: var(--font-secondary);
+    margin-top: 1rem;
+}
+
+/* Question Card Styles */
+.question-card {
+    background: #1a1a1a;
+    border: 1px solid #333;
+    padding: 1.5rem;
+    border-radius: 8px;
+    position: relative;
+    animation: slideUp 0.3s ease-out forwards;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.q-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+}
+
+.q-num {
+    color: var(--primary-red);
+    font-family: var(--font-primary);
+    font-size: 1.5rem;
+}
+
+.q-badge {
+    background: #333;
+    color: #fff;
+    padding: 2px 8px;
+    font-size: 0.7rem;
+    border-radius: 4px;
+    text-transform: uppercase;
+    font-family: var(--font-secondary);
+}
+
+.q-text {
+    font-family: var(--font-secondary);
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.4;
+}
+
+.q-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.option-btn {
+    text-align: left;
+    background: transparent;
+    border: 1px solid #444;
+    padding: 0.8rem;
+    color: #ccc;
+    font-family: var(--font-secondary);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.option-btn:hover {
+    border-color: var(--primary-red);
+    background: rgba(248, 49, 28, 0.05);
+}
+
+.q-footer {
+    border-top: 1px solid #333;
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+}
+
+.reveal-btn {
+    background: transparent;
+    color: var(--text-gray);
+    border: 1px dashed #555;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    font-family: var(--font-secondary);
+    width: 100%;
+}
+
+.reveal-btn:hover {
+    color: white;
+    border-color: white;
+}
+
+.answer-panel {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: rgba(0, 255, 0, 0.1);
+    border: 1px solid #00AA00;
+    border-radius: 4px;
+    color: #ccffcc;
+    font-family: var(--font-secondary);
+    font-size: 0.9rem;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* =========================================
+   SETTINGS & AUTH STYLES
+   ========================================= */
+
+/* Nav Settings Button */
+.nav-icon-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-black);
+    /* Changed to Black */
+    cursor: pointer;
+    transition: transform 0.2s;
+    padding: 0;
+    display: flex;
+    align-items: center;
+}
+
+.nav-icon-btn:hover {
+    transform: rotate(90deg);
+}
+
+/* Settings Modal Variations */
+.settings-compact {
+    max-width: 500px;
+    height: auto;
+    min-height: 400px;
+    background: #000;
+    border: 1px solid var(--text-gray);
+    flex-direction: column;
+}
+
+.settings-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid #333;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.settings-icon {
+    color: var(--primary-red);
+}
+
+.settings-title {
+    font-family: var(--font-primary);
+    font-size: 1.5rem;
+    color: white;
+    margin: 0;
+}
+
+.settings-close {
+    color: white;
+}
+
+.settings-body {
+    padding: 2rem;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-desc {
+    font-family: var(--font-secondary);
+    color: var(--text-gray);
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+}
+
+.input-group {
+    margin-bottom: 1.5rem;
+}
+
+
+/* Model Search Bar */
+.model-search-container {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.5rem 1rem;
+    background: #111;
+    border: 1px solid #333;
+    margin-bottom: 1.5rem;
+    border-radius: 4px;
+    /* Sharp or slight radius */
+}
+
+.search-icon-small {
+    width: 20px;
+    height: 20px;
+    color: var(--text-gray);
+}
+
+.model-search-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    color: white;
+    font-family: var(--font-secondary);
+    font-size: 1rem;
+    outline: none;
+}
+
+.model-search-input::placeholder {
+    color: #555;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    letter-spacing: 1px;
+}
+
+/* Model Grid Styles */
+.model-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* 4 Column Grid */
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.model-card {
+    background: transparent;
+    border: 1px solid #333;
+    padding: 1.5rem 1rem;
+    border-radius: 0px;
+    /* Sharp corners */
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+}
+
+.model-card:hover:not(.disabled) {
+    border-color: var(--primary-red);
+    background: rgba(248, 49, 28, 0.1);
+    box-shadow: 0 0 15px rgba(248, 49, 28, 0.5);
+    /* Light Up Effect */
+    transform: translateY(-2px);
+}
+
+.model-card.active {
+    background: var(--primary-red);
+    border-color: var(--primary-red);
+}
+
+.model-card.active .model-name,
+.model-card.active .model-tag {
+    color: black;
+    /* Inverted Text */
+}
+
+.model-name {
+    font-family: var(--font-primary);
+    font-size: 1.2rem;
+    color: white;
+    text-transform: uppercase;
+}
+
+.model-tag {
+    font-family: var(--font-secondary);
+    font-size: 0.7rem;
+    color: var(--text-gray);
+    letter-spacing: 1px;
+}
+
+.model-card.disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    border-style: dashed;
+}
+
+.status-message {
+    margin-top: 1.5rem;
+    color: var(--primary-red);
+    font-family: var(--font-secondary);
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    animation: fadeIn 0.5s;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Locked UI State */
+.locked {
+    filter: grayscale(100%) opacity(0.5);
+    pointer-events: none;
+    position: relative;
+}
+
+/* Optional: Lock Icon Overlay */
+.locked::after {
+    content: "LOCKED";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #000;
+    color: var(--text-gray);
+    padding: 0.5rem 1rem;
+    border: 1px solid #333;
+    font-family: var(--font-secondary);
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    z-index: 10;
+}
+
+/* =========================================
+   API ACCESS BAR
+   ========================================= */
+.api-bar-section {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin: 4rem 0;
+    /* Consistent Spacing */
+    position: relative;
+    z-index: 50;
+}
+
+.api-bar-container {
+    width: 90%;
+    max-width: 1800px;
+    background: var(--primary-red);
+    border: none;
+    border-radius: 4px;
+
+    padding: 1.5rem 3rem;
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+    box-shadow: none;
+}
+
+.api-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+
+    /* Box Styling */
+    background: radial-gradient(circle at center, #1a1a1a 0%, #000000 80%);
+    padding: 0.8rem 2rem;
+    border: 1px solid #333;
+    height: 100%;
+    /* Match height optionally, but padding handles it */
+}
+
+/* Icon matching header size */
+.api-icon-large {
+    width: 38px;
+    height: 38px;
+    color: var(--text-white);
+    /* Pulse animation */
+    animation: pulse-scale 2s infinite;
+}
+
+.api-title {
+    font-family: var(--font-primary);
+    font-size: 2rem;
+    margin: 0;
+    letter-spacing: -0.01em;
+    background: linear-gradient(to bottom, #F8311C 0%, #aa2016 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    line-height: 1;
+    /* Keeping line-height from before as it might be useful */
+}
+
+.api-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+    background: #FFFFFF;
+    /* White Box */
+    padding: 0.3rem;
+    border: none;
+}
+
+.api-input-field {
+    width: 100%;
+    background: transparent;
+    border: none;
+    font-family: var(--font-secondary);
+    font-size: 1.5rem;
+    /* Large readable text */
+    color: var(--primary-red);
+    /* Signal Red Text */
+    padding: 0.5rem 1rem;
+    outline: none;
+    transition: all 0.3s;
+    letter-spacing: 1px;
+}
+
+.api-input-field:focus {
+    border-color: var(--primary-red);
+    background: rgba(255, 140, 0, 0.05);
+    /* Slight orange tint */
+}
+
+.api-input-field::placeholder {
+    color: #444;
+    font-weight: 500;
+    font-size: 1.2rem;
+}
+
+.input-status-icon {
+    position: absolute;
+    right: 1rem;
+    color: #555;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .api-bar-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+
+    .api-header {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .api-input-wrapper {
+        width: 100%;
+    }
+}
+
+/* =========================================
+   UNIVERSAL INGEST STYLES
+   ========================================= */
+
+/* Overrides for the new structure */
+.card-ingest {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    /* Ensure absolute children position relative to this */
+}
+
+/* Back Button */
+.ingest-back {
+    position: absolute;
+    top: 1rem;
+    left: 1.5rem;
+    color: var(--text-gray);
+    cursor: pointer;
+    z-index: 20;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.5rem;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    /* subtle bg */
+}
+
+.ingest-back:hover {
+    color: var(--text-white);
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateX(-3px);
+}
+
+.ingest-back.hidden {
+    display: none;
+}
+
+/* 1. Top Tabs */
+.ingest-tabs {
+    position: absolute;
+    top: 1rem;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    z-index: 10;
+}
+
+.tab-item {
+    font-family: var(--font-secondary);
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-transform: uppercase;
+}
+
+.tab-item:hover {
+    color: var(--text-white);
+}
+
+.tab-item.active {
+    color: var(--primary-red);
+    text-shadow: 0 0 10px rgba(248, 49, 28, 0.5);
+}
+
+/* 2. Initial State */
+.ingest-state {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.3s ease;
+}
+
+.ingest-state.hidden {
+    display: none;
+    opacity: 0;
+}
+
+#ingest-initial {
+    cursor: pointer;
+}
+
+.initial-icon {
+    color: var(--text-gray);
+    width: 64px;
+    height: 64px;
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+}
+
+#ingest-initial:hover .initial-icon {
+    color: var(--primary-red);
+    transform: scale(1.1);
+    filter: drop-shadow(0 0 10px var(--primary-red));
+}
+
+.initial-text {
+    font-family: var(--font-secondary);
+    color: var(--text-gray);
+    font-size: 0.9rem;
+    letter-spacing: 2px;
+    font-weight: 700;
+}
+
+#ingest-initial:hover .initial-text {
+    color: var(--text-white);
+}
+
+/* 3. Selection Grid */
+#ingest-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 1rem;
+    width: 80%;
+    height: 70%;
+    /* constrain height */
+}
+
+/* Override flex display for hidden grid */
+#ingest-grid.hidden {
+    display: none;
+}
+
+.grid-tile {
+    background: #000;
+    border: 1px solid var(--text-white);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.grid-tile:hover {
+    border-color: var(--primary-red);
+    box-shadow: 0 0 15px rgba(248, 49, 28, 0.5);
+}
+
+.tile-label {
+    font-family: var(--font-primary);
+    color: var(--text-white);
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    z-index: 2;
+}
+
+.tile-desc {
+    font-family: var(--font-secondary);
+    color: var(--text-gray);
+    font-size: 0.8rem;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    text-align: center;
+    padding: 0 1rem;
+    z-index: 2;
+}
+
+.grid-tile:hover .tile-desc {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* 4. Active Input Area */
+#ingest-active {
+    width: 100%;
+    height: 100%;
+    padding-top: 3rem;
+    /* Space for tabs */
+}
+
+.input-mode {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.input-mode.hidden {
+    display: none;
+}
+
+/* File Drop Zone */
+.drop-zone {
+    width: 80%;
+    height: 60%;
+    border: 2px dashed var(--text-gray);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: var(--text-gray);
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.drop-zone:hover {
+    border-color: var(--primary-red);
+    color: var(--text-white);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Link Input */
+.ingest-input {
+    width: 80%;
+    background: #FFFFFF;
+    border: none;
+    padding: 1rem;
+    font-family: var(--font-secondary);
+    font-size: 1rem;
+    color: #000;
+    font-weight: 600;
+    outline: none;
+    text-align: center;
+}
+
+.ingest-input::placeholder {
+    color: #666;
+    font-style: italic;
+}
+
+/* Textarea */
+.ingest-textarea {
+    width: 80%;
+    height: 70%;
+    background: #000;
+    border: 1px solid var(--text-gray);
+    color: var(--text-white);
+    padding: 1rem;
+    font-family: var(--font-secondary);
+    font-size: 0.9rem;
+    resize: none;
+    outline: none;
+}
+
+.ingest-textarea:focus {
+    border-color: var(--primary-red);
+}
+
+/* Helper to see active area */
+.hidden {
+    display: none !important;
+}
+
+.ingest-footer {
+    position: absolute;
+    bottom: 1.5rem;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    font-family: var(--font-secondary);
+    font-size: 0.75rem;
+    /* Small text */
+    color: var(--text-gray);
+    letter-spacing: 1px;
+    opacity: 0.6;
+    pointer-events: none;
+    /* Non-interactive */
+}

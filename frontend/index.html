@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BrainBolt</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- Space Grotesk (Secondary) and Syne (Fallback for Akony's sharp/wide style) -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <div class="main-container">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="nav-inner">
+                <div class="nav-logo">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                    </svg>
+                </div>
+
+                <div class="nav-actions" style="display: flex; align-items: center; gap: 2rem;">
+                    <span class="user-id"
+                        style="font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px;">[Multi
+                        Modal
+                        APP]</span>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <main class="hero">
+            <!-- Top Text (White on Red) -->
+            <div class="hero-top">
+                <h1 class="glitch-text" data-text="BRAIN">BRAIN</h1>
+            </div>
+
+            <!-- Central Card (White Background) -->
+            <div class="hero-card">
+                <div class="card-content">
+                    <!-- Restored BOLT text -->
+                    <h1 class="inverse-text">BOLT</h1>
+
+                    <div class="left-content">
+                        <div>
+                            <span class="stat-big">4+</span>
+                            <div class="stat-label">FILE FORMATS SUPPORTED</div>
+                        </div>
+                        <button class="cta-button">EXPLORE MORE</button>
+                    </div>
+
+                    <div class="right-content">
+                        <div class="vision-text">
+                            VISION IS <br> NEW LOGIC
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Background Image Slot for the Card -->
+                <div class="card-image-bg"></div>
+            </div>
+        </main>
+
+        <!-- API Access Bar -->
+        <section class="api-bar-section">
+            <div class="api-bar-container">
+                <div class="api-header">
+                    <i data-lucide="settings" class="api-icon-large"></i>
+                    <h3 class="api-title">SYSTEM ACCESS</h3>
+                </div>
+                <div class="api-input-wrapper">
+                    <input type="password" id="inline-api-key" class="api-input-field"
+                        placeholder="// ENTER API KEY TO UNLOCK NEURAL GRID">
+                    <div class="input-status-icon">
+                        <i data-lucide="lock" id="api-lock-icon"></i>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Neural Grid -->
+        <section class="features-section">
+            <div class="bento-grid">
+                <!-- Large Card: Universal Ingest -->
+                <div class="bento-card card-ingest" id="ingest-card">
+                    <div class="scan-line"></div>
+
+                    <!-- Back Button -->
+                    <div id="ingest-back-btn" class="ingest-back hidden">
+                        <i data-lucide="chevron-left"></i>
+                    </div>
+
+                    <!-- Top Tabs (Hidden by default) -->
+                    <div class="ingest-tabs hidden" id="ingest-tabs">
+                        <div class="tab-item active" data-tab="files">[FILES]</div>
+                        <div class="tab-item" data-tab="links">[LINKS]</div>
+                        <div class="tab-item" data-tab="text">[RAW TEXT]</div>
+                    </div>
+
+                    <!-- 1. Initial State -->
+                    <div class="ingest-state" id="ingest-initial">
+                        <i data-lucide="zap" class="initial-icon" size="48"></i>
+                        <p class="initial-text">[ CLICK TO INITIALIZE INGESTION ]</p>
+                    </div>
+
+                    <!-- 2. Selection Grid (Hidden) -->
+                    <div class="ingest-state hidden" id="ingest-grid">
+                        <div class="grid-tile" data-type="documents">
+                            <span class="tile-label">DOCUMENTS</span>
+                            <div class="tile-desc">Extract text from PDFs</div>
+                        </div>
+                        <div class="grid-tile" data-type="visuals">
+                            <span class="tile-label">VISUALS</span>
+                            <div class="tile-desc">OCR / Vision Processing</div>
+                        </div>
+                        <div class="grid-tile" data-type="weblink">
+                            <span class="tile-label">WEB LINK</span>
+                            <div class="tile-desc">Scrape URL / YouTube</div>
+                        </div>
+                        <div class="grid-tile" data-type="search">
+                            <span class="tile-label">LIVE SEARCH</span>
+                            <div class="tile-desc">DuckDuckGo Search</div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Active Input Area (Hidden) -->
+                    <div class="ingest-state hidden" id="ingest-active">
+                        <!-- File Input (Default) -->
+                        <div class="input-mode" id="mode-files">
+                            <div class="drop-zone">
+                                <i data-lucide="upload-cloud" size="32"></i>
+                                <p>DRAG & DROP FILES HERE</p>
+                            </div>
+                        </div>
+
+                        <!-- Link Input -->
+                        <div class="input-mode hidden" id="mode-links">
+                            <input type="text" class="ingest-input" placeholder="// PASTE URL HERE..." id="link-input">
+                        </div>
+
+                        <!-- Text Input -->
+                        <div class="input-mode hidden" id="mode-text">
+                            <textarea class="ingest-textarea"
+                                placeholder="// PASTE RAW TEXT OR NOTES HERE..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Footer: Accepted Formats -->
+                    <div class="ingest-footer">
+                        SUPPORTED: PDF, JPG, PNG, TXT, DOCX
+                    </div>
+                </div>
+
+                <!-- Medium Card: Summarizer -->
+                <div class="bento-card card-summary locked">
+                    <div class="card-header">
+                        <div class="status-dot white"></div>
+                        <h3 class="card-title">SUMMARIZER</h3>
+                    </div>
+                    <p class="card-desc">COMPRESS TIME.<br>HOURS TO SECONDS.</p>
+                </div>
+
+                <!-- Medium Card: Quiz Generator -->
+                <div class="bento-card card-quiz locked">
+                    <div class="card-header">
+                        <div class="status-dot red"></div>
+                        <h3 class="card-title">QUIZ ENGINE</h3>
+                    </div>
+                    <p class="card-desc">ACTIVE RECALL.<br>INSTANT GENERATION.</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Summarizer Modal -->
+    <div id="summarizer-modal" class="modal hidden">
+        <div class="modal-content">
+            <button class="close-modal">&times;</button>
+
+            <div class="modal-sidebar">
+                <h3 class="sidebar-title">SELECT MODE</h3>
+                <div class="mode-list">
+                    <button class="mode-btn" data-mode="concise">Concise</button>
+                    <button class="mode-btn" data-mode="detailed">Detailed</button>
+                    <button class="mode-btn" data-mode="bullet_points">Bullet Points</button>
+                    <button class="mode-btn" data-mode="educational">Educational</button>
+                    <button class="mode-btn" data-mode="exam_ready">Exam Ready</button>
+                    <button class="mode-btn" data-mode="executive">Executive</button>
+                    <button class="mode-btn" data-mode="technical_deep_dive">Technical Deep Dive</button>
+                </div>
+            </div>
+
+            <div class="modal-main">
+                <div class="output-header">
+                    <span class="status-indicator"></span>
+                    <h3 class="output-title">GENERATED OUTPUT</h3>
+                </div>
+                <div class="output-console" id="summary-output">
+                    <p class="placeholder-text">// Select a mode to begin processing...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quiz Generator Modal -->
+    <div id="quiz-modal" class="modal hidden">
+        <div class="modal-content quiz-theme">
+            <button class="close-modal quiz-close">&times;</button>
+
+            <div class="modal-sidebar quiz-sidebar">
+                <h3 class="sidebar-title">CONFIGURATION</h3>
+
+                <!-- Difficulty Level -->
+                <div class="control-group">
+                    <label class="control-label">DIFFICULTY LEVEL</label>
+                    <div class="difficulty-selector">
+                        <button class="diff-btn" data-level="Easy">EASY</button>
+                        <button class="diff-btn active" data-level="Medium">MED</button>
+                        <button class="diff-btn" data-level="Hard">HARD</button>
+                    </div>
+                </div>
+
+                <!-- Question Count -->
+                <div class="control-group">
+                    <label class="control-label">QUESTIONS: <span id="q-count-display">5</span></label>
+                    <input type="range" id="q-count-slider" min="5" max="20" step="5" value="5" class="ui-slider">
+                    <div class="slider-ticks">
+                        <span>5</span><span>10</span><span>15</span><span>20</span>
+                    </div>
+                </div>
+
+                <!-- Question Type -->
+                <div class="control-group">
+                    <label class="control-label">TYPE</label>
+                    <div class="custom-select">
+                        <select id="q-type-select">
+                            <option value="mcq">Multiple Choice</option>
+                            <option value="true_false">True / False</option>
+                            <option value="short_answer" disabled>Short Answer (Pro)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Focus Area -->
+                <div class="control-group">
+                    <label class="control-label">FOCUS AREA (OPTIONAL)</label>
+                    <input type="text" id="focus-area-input" class="ui-input" placeholder="e.g. Chapter 3, Ethics...">
+                </div>
+
+                <button id="generate-quiz-btn" class="generate-btn">
+                    GENERATE QUIZ
+                    <i data-lucide="zap" class="btn-icon"></i>
+                </button>
+            </div>
+
+            <div class="modal-main quiz-main">
+                <div class="output-header">
+                    <span class="status-indicator red-glow"></span>
+                    <h3 class="output-title">QUIZ STUDIO</h3>
+                </div>
+                <div class="quiz-output-container" id="quiz-output">
+                    <div class="empty-state">
+                        <i data-lucide="brain-circuit" size="48"></i>
+                        <p>Configure parameters and hit Generate to start the simulation.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- Settings Modal (Authentication & Models) -->
+    <!-- Model Selection Modal -->
+    <div id="model-modal" class="modal hidden">
+        <div class="modal-content settings-compact" style="max-width: 900px;"> <!-- Wider for 4 columns -->
+            <button class="close-modal settings-close">&times;</button>
+
+            <div class="settings-header">
+                <i data-lucide="cpu" class="settings-icon"></i>
+                <h3 class="settings-title">SELECT MODEL PROTOCOL</h3>
+            </div>
+
+            <div class="settings-body">
+                <p class="settings-desc">Choose a neural network to power the analysis engine.</p>
+
+                <!-- Search Bar -->
+                <div class="model-search-container">
+                    <i data-lucide="search" class="search-icon-small"></i>
+                    <input type="text" id="model-search" class="model-search-input" placeholder="Search Protocol...">
+                </div>
+
+                <div class="model-grid">
+                    <!-- Row 1 -->
+                    <button class="model-card" data-model="gpt-4">
+                        <span class="model-name">GPT-4</span>
+                        <span class="model-tag">TURBO</span>
+                    </button>
+                    <button class="model-card" data-model="gemini-pro">
+                        <span class="model-name">GEMINI</span>
+                        <span class="model-tag">PRO 1.5</span>
+                    </button>
+                    <button class="model-card" data-model="claude-3">
+                        <span class="model-name">CLAUDE</span>
+                        <span class="model-tag">OPUS</span>
+                    </button>
+                    <button class="model-card" data-model="mistral-large">
+                        <span class="model-name">MISTRAL</span>
+                        <span class="model-tag">LARGE</span>
+                    </button>
+
+                    <!-- Row 2 -->
+                    <button class="model-card" data-model="cohere">
+                        <span class="model-name">COMMAND</span>
+                        <span class="model-tag">R+</span>
+                    </button>
+                    <button class="model-card" data-model="llama-3">
+                        <span class="model-name">LLAMA 3</span>
+                        <span class="model-tag">70B</span>
+                    </button>
+                    <button class="model-card" data-model="grok">
+                        <span class="model-name">GROK</span>
+                        <span class="model-tag">1.5</span>
+                    </button>
+                    <button class="model-card disabled" data-model="dbrx">
+                        <span class="model-name">DBRX</span>
+                        <span class="model-tag">OFFLINE</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Smart Paste Modal -->
+    <div id="paste-modal" class="modal hidden">
+        <div class="modal-content"
+            style="max-width: 500px; height: auto; padding: 2rem; flex-direction: column; text-align: center;">
+            <i data-lucide="link" size="48" style="margin: 0 auto 1rem auto; color: #000;"></i>
+            <h3 style="font-family: 'Space Grotesk', sans-serif; color: #000; margin-bottom: 1rem;">DETECTED URL</h3>
+            <p style="font-family: 'Space Grotesk', sans-serif; color: #000; margin-bottom: 2rem;">Would you like to
+                scrape this page or fetch YouTube transcripts?</p>
+            <div style="display: flex; gap: 1rem; justify-content: center;">
+                <button id="paste-scrape-btn" class="cta-button"
+                    style="background: #000; color: #fff; border: none;">SCRAPE PAGE</button>
+                <button id="paste-cancel-btn" class="cta-button"
+                    style="background: transparent; border: 1px solid #000; color: #000;">CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
