@@ -16,6 +16,8 @@ class QuizQuestion(BaseModel):
 class QuizOutput(BaseModel):
     quiz: List[QuizQuestion]
 
+
+
 class QuizProcessor:
     def __init__(self, model_name="gemini-2.0-flash"):
         self.llm = ChatGoogleGenerativeAI(model=model_name, temperature=0.3)
@@ -39,6 +41,7 @@ class QuizProcessor:
         
         chain = prompt | self.llm | self.parser
         
+        
         try:
             response = chain.invoke({
                 "num_questions": num_questions,
@@ -46,6 +49,7 @@ class QuizProcessor:
                 "text": text
             })
             return response['quiz'] if isinstance(response, dict) and 'quiz' in response else response
+        
         except Exception as e:
             logger.error(f"Quiz generation failed: {e}")
             return []

@@ -5,6 +5,8 @@ from langchain_core.output_parsers import StrOutputParser
 
 logger = logging.getLogger(__name__)
 
+
+
 class SummarizerProcessor:
     def __init__(self, model_name="gemini-2.0-flash"):
         self.llm = ChatGoogleGenerativeAI(model=model_name, temperature=0.3)
@@ -97,7 +99,6 @@ Output:
         chain = prompt_template | self.llm | self.output_parser
 
         try:
-            
             response = chain.invoke({
                 "text": text,
                 "summary_type": summary_type,
@@ -105,5 +106,5 @@ Output:
             })
             return response
         except Exception as e:
-            logger.error(f"Summarization failed: {e}")
-            return f"Error generating summary: {e}"
+            logger.error(f"Summarization processing failed: {e}")
+            return "Error generating summary."
