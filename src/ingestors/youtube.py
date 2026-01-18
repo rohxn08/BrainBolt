@@ -1,7 +1,6 @@
 from .base import BaseIngestor
 import logging
-import re
-from langchain_community.document_loaders import YoutubeLoader
+from youtube_transcript_api import YouTubeTranscriptApi
 
 logger = logging.getLogger(__name__)
 
@@ -19,16 +18,30 @@ class YouTubeIngestor(BaseIngestor):
 
     def _fetch_transcript(self, url: str) -> str:
         try:
+            if "v=" in url:
+                video_id = url.split("v=")[1].split("&")[0]
+            else:
+                video_id = url.split("/")[-1]
+                
+            logger.info(f"Fetching transcript for Video ID: {video_id}")
+            
+            yt_api = YouTubeTranscriptApi()
+            
+            transcript_list = yt_api.list(video_id)
+            
+            try:
+                 transcript = transcript_list.find_transcript(['en', 'hi']) 
+            except:
+                 logger.warning("English/Hindi not found, falling back to first available...")
+                 transcript = next(iter(transcript_list))
+                 
+            data = transcript.fetch()
+            
+            full_text = " ".join([i.text for i in data])
+            return full_text
 
-            loader = YoutubeLoader.from_youtube_url(
-                url, 
-                add_video_info=True, 
-                language=["en", "hi"], 
-                translation="en"
-            )
-            docs = loader.load()
-            return "\n".join([d.page_content for d in docs])
         except Exception as e:
+            logger.error(f"Error fetching transcript: {str(e)}")
             return f"Error fetching transcript: {str(e)}"
 
     def load_multimodal(self, source: str) -> dict:
@@ -36,7 +49,6 @@ class YouTubeIngestor(BaseIngestor):
         Fetches transcript and returns it in standardized multimodal format.
         """
         transcript = self.load(source)
-        # Check if the load() returned an error message
         if transcript.startswith("Error"):
             logger.error(f"Multimodal load failed: {transcript}")
             return {"text_pages": [], "images": []}
