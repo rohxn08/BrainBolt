@@ -121,12 +121,25 @@ async def upload_file(file: UploadFile = File(...)):
     Handle file uploads.
     """
     try:
+        # Check file size (Read into memory to check size - efficient for small limits like 10MB)
+        # Alternatively, seek to end to get size if supported, or read chunks.
+        # Simple method for FastAPI UploadFile:
+        file.file.seek(0, 2)
+        file_size = file.file.tell()
+        file.file.seek(0) # Reset cursor
+        
+        MAX_SIZE_MB = 10
+        if file_size > MAX_SIZE_MB * 1024 * 1024:
+            raise HTTPException(status_code=413, detail=f"File exceeds maximum size of {MAX_SIZE_MB}MB")
+
         file_location = os.path.join(TEMP_DIR, file.filename)
         with open(file_location, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
         
-        logger.info(f"File saved to {file_location}")
+        logger.info(f"File saved to {file_location} (Size: {file_size/1024/1024:.2f} MB)")
         return {"file_path": file_location, "filename": file.filename}
+    except HTTPException as he:
+        raise he
     except Exception as e:
         logger.error(f"Upload failed: {e}")
         raise HTTPException(status_code=500, detail="File upload failed")
