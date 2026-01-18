@@ -47,3 +47,56 @@ class FileIngestor(BaseIngestor):
     def _read_text(self, path: str) -> str:
         with open(path, 'r', encoding='utf-8', errors='ignore') as f:
             return f.read()
+
+    def load_multimodal(self, source: str) -> dict:
+        """
+        Extracts both text and images from a document.
+        Returns: {'text_pages': [{'text': str, 'page': int}], 'images': [{'image': PIL.Image, 'page': int, 'id': str}]}
+        """
+        if not os.path.exists(source):
+            return {"text_pages": [], "images": []}
+            
+        ext = os.path.splitext(source)[1].lower()
+        if ext == ".pdf":
+            return self._read_pdf_multimodal(source)
+        else:
+            # Fallback for text-only files
+            text = self.load(source)
+            return {
+                "text_pages": [{"text": text, "page": 0}], 
+                "images": []
+            }
+
+    def _read_pdf_multimodal(self, path: str) -> dict:
+        import fitz
+        from PIL import Image
+        import io
+        
+        doc = fitz.open(path)
+        result = {"text_pages": [], "images": []}
+        
+        for i, page in enumerate(doc):
+            # Extract Text
+            text = page.get_text()
+            if text.strip():
+                result["text_pages"].append({"text": text, "page": i})
+            
+            # Extract Images
+            for img_index, img in enumerate(page.get_images(full=True)):
+                try:
+                    xref = img[0]
+                    base_image = doc.extract_image(xref)
+                    image_bytes = base_image["image"]
+                    pil_image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+                    image_id = f"page{i}_img{img_index}"
+                    
+                    result["images"].append({
+                        "image": pil_image,
+                        "page": i,
+                        "id": image_id
+                    })
+                except Exception as e:
+                    logger.warning(f"Error extracting image {img_index} on page {i}: {e}")
+        
+        doc.close()
+        return result
