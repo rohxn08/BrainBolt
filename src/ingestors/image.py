@@ -79,5 +79,32 @@ class ImageIngestor(BaseIngestor):
             logger.error(f"Failed to analyze image with LLM: {e}")
             return "Error analyzing the image with the LLM"
 
+    def load_multimodal(self, source: str) -> dict:
+        """
+        Extracts both text (via OCR/Vision) and the raw image for embedding.
+        Returns: {'text_pages': [{'text': str}], 'images': [{'image': PIL.Image, 'id': str}]}
+        """
+        from PIL import Image
+        
+        # 1. Get Text (OCR or Vision Description)
+        text = self.load(source)
+        
+        # 2. Get Image Object
+        try:
+            pil_image = Image.open(source).convert("RGB")
+            image_id = os.path.basename(source)
+            
+            return {
+                "text_pages": [{"text": text, "page": 0}],
+                "images": [{
+                    "image": pil_image,
+                    "page": 0,
+                    "id": image_id
+                }]
+            }
+        except Exception as e:
+            logger.error(f"Failed to load image for multimodal: {e}")
+            return {"text_pages": [], "images": []}
+
 
 

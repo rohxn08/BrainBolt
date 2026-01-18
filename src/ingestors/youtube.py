@@ -30,3 +30,18 @@ class YouTubeIngestor(BaseIngestor):
             return "\n".join([d.page_content for d in docs])
         except Exception as e:
             return f"Error fetching transcript: {str(e)}"
+
+    def load_multimodal(self, source: str) -> dict:
+        """
+        Fetches transcript and returns it in standardized multimodal format.
+        """
+        transcript = self.load(source)
+        # Check if the load() returned an error message
+        if transcript.startswith("Error"):
+            logger.error(f"Multimodal load failed: {transcript}")
+            return {"text_pages": [], "images": []}
+            
+        return {
+            "text_pages": [{"text": transcript, "page": 0}],
+            "images": []
+        }
