@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let isFileUploaded = false;
     let currentSourcePath = null; // Store backend path
     let isSystemUnlocked = false;
+    let currentApiKey = null;
 
     // Elements
     const ingestCard = document.querySelector('.card-ingest');
@@ -159,15 +160,34 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Link/Text Input
-    const linkInput = document.getElementById('link-input');
-    if (linkInput) {
-        linkInput.addEventListener('change', (e) => {
-            if (e.target.value.trim().length > 0) {
-                currentSourcePath = e.target.value.trim();
-                isFileUploaded = true;
-                alert("Topic/Link set as source.");
+    // Text Input Processing
+    const processTextBtn = document.getElementById('process-text-btn');
+    if (processTextBtn) {
+        processTextBtn.addEventListener('click', () => {
+            const textarea = document.querySelector('.ingest-textarea');
+            const content = textarea.value.trim();
+
+            if (content.length === 0) {
+                alert("Please enter some text first.");
+                return;
             }
+
+            // Create a virtual file to reuse the upload logic
+            const blob = new Blob([content], { type: 'text/plain' });
+            const file = new File([blob], "raw_text_input.txt", { type: "text/plain" });
+
+            // Visual feedback
+            processTextBtn.innerHTML = 'UPLOADING...';
+
+            uploadFileToBackend(file).then(() => {
+                processTextBtn.innerHTML = 'PROCESS <i data-lucide="check" style="display:inline; width:16px;"></i>';
+                setTimeout(() => {
+                    processTextBtn.innerHTML = 'PROCESS <i data-lucide="arrow-right" style="display:inline; width:16px;"></i>';
+                    textarea.value = ""; // Clear input
+                    // Hide active area to show it's done? Or just alert?
+                    // alert("Text ingested successfully!"); 
+                }, 1000);
+            });
         });
     }
 
@@ -393,9 +413,82 @@ document.addEventListener('DOMContentLoaded', () => {
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ api_key: key, model_name: "gemini-2.0-flash" })
                         });
-                        if (!res.ok) console.warn("Backend handshake failed, proceeding in offline mode.");
+
+                        if (res.ok) {
+                            const data = await res.json();
+                            // Update Model Grid with real models
+                            if (data.models && Array.isArray(data.models)) {
+                                const grid = document.querySelector('.model-grid');
+                                if (grid) {
+                                    grid.innerHTML = ''; // Clear placeholders
+                                    data.models.forEach(modelName => {
+                                        const btn = document.createElement('button');
+                                        btn.className = 'model-card';
+                                        btn.dataset.model = modelName;
+
+                                        // Format Name
+                                        // e.g. gemini-1.5-pro -> GEMINI / 1.5 PRO
+                                        let name = modelName.toUpperCase();
+                                        let tag = "AI";
+
+                                        if (name.includes('GEMINI')) {
+                                            const parts = name.split('-');
+                                            name = parts[0];
+                                            tag = parts.slice(1).join(' ');
+                                        }
+
+                                        btn.innerHTML = `
+                                            <span class="model-name">${name}</span>
+                                            <span class="model-tag">${tag}</span>
+                                        `;
+
+                                        // Attach selection logic
+                                        btn.addEventListener('click', async () => {
+                                            document.querySelectorAll('.model-card').forEach(c => c.classList.remove('active'));
+                                            btn.classList.add('active');
+                                            btn.style.borderColor = "#00FF00"; // Immediate visual feedback
+
+                                            // Helper to close modal
+                                            const closeModal = () => {
+                                                setTimeout(() => {
+                                                    const modalToClose = document.getElementById('model-modal');
+                                                    if (modalToClose) {
+                                                        modalToClose.classList.remove('active');
+                                                        setTimeout(() => modalToClose.classList.add('hidden'), 300);
+                                                    }
+                                                }, 500);
+                                            };
+
+                                            // Switch Active Model
+                                            if (currentApiKey) {
+                                                console.log("Switching model to:", modelName);
+                                                try {
+                                                    await fetch(`${API_BASE_URL}/api/init`, {
+                                                        method: 'POST',
+                                                        headers: { 'Content-Type': 'application/json' },
+                                                        body: JSON.stringify({ api_key: currentApiKey, model_name: modelName })
+                                                    });
+                                                    // We close regardless of success/fail to keep UI responsive
+                                                } catch (err) {
+                                                    console.error("Model switch API failed", err);
+                                                }
+                                            } else {
+                                                console.warn("No API key present, selecting UI only.");
+                                            }
+
+                                            // ALWAYS close
+                                            closeModal();
+                                        });
+
+                                        grid.appendChild(btn);
+                                    });
+                                }
+                            }
+                        } else {
+                            console.warn("Backend handshake failed, proceeding in offline mode.");
+                        }
                     } catch (err) {
-                        console.warn("Backend unavailable, proceeding in offline mode.");
+                        console.warn("Backend unavailable, proceeding in offline mode.", err);
                     }
 
                     // Always unlock to maintain flow
@@ -437,5 +530,39 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+
+
+    // =========================================
+    // 5. MODEL SEARCH FUNCTIONALITY
+    // =========================================
+    const modelSearchInput = document.getElementById('model-search');
+    if (modelSearchInput) {
+        modelSearchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            // Re-query cards as they might be dynamic
+            const cards = document.querySelectorAll('.model-card');
+
+            cards.forEach(card => {
+                const modelName = card.dataset.model ? card.dataset.model.toLowerCase() : '';
+                const textContent = card.innerText.toLowerCase();
+
+                if (modelName.includes(query) || textContent.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    // Close Settings Modal specifically
+    const settingsCloseBtn = document.querySelector('.settings-close');
+    if (settingsCloseBtn && modelModal) {
+        settingsCloseBtn.addEventListener('click', () => {
+            modelModal.classList.remove('active');
+            setTimeout(() => modelModal.classList.add('hidden'), 300);
+        });
+    }
 
 });

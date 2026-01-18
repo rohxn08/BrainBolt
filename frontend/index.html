@@ -100,7 +100,7 @@
                     <!-- Top Tabs (Hidden by default) -->
                     <div class="ingest-tabs hidden" id="ingest-tabs">
                         <div class="tab-item active" data-tab="files">[FILES]</div>
-                        <div class="tab-item" data-tab="links">[LINKS]</div>
+                        <!-- Removed Links Tab -->
                         <div class="tab-item" data-tab="text">[RAW TEXT]</div>
                     </div>
 
@@ -120,16 +120,16 @@
                             <span class="tile-label">VISUALS</span>
                             <div class="tile-desc">OCR / Vision Processing</div>
                         </div>
-                        <div class="grid-tile" data-type="weblink">
-                            <span class="tile-label">WEB LINK</span>
-                            <div class="tile-desc">Scrape URL / YouTube</div>
-                        </div>
+                        <!-- Links and Search tiles removed / commented out for now if Links feature is gone, 
+                             but user just mentioned removing 'links thing' from documents section, assumed tabs.
+                             If grid tiles are also entry points, I should remove 'weblink' tile. -->
                         <div class="grid-tile" data-type="search">
                             <span class="tile-label">LIVE SEARCH</span>
                             <div class="tile-desc">DuckDuckGo Search</div>
                         </div>
                     </div>
 
+                    <!-- 3. Active Input Area (Hidden) -->
                     <!-- 3. Active Input Area (Hidden) -->
                     <div class="ingest-state hidden" id="ingest-active">
                         <!-- File Input (Default) -->
@@ -140,15 +140,16 @@
                             </div>
                         </div>
 
-                        <!-- Link Input -->
-                        <div class="input-mode hidden" id="mode-links">
-                            <input type="text" class="ingest-input" placeholder="// PASTE URL HERE..." id="link-input">
-                        </div>
+                        <!-- Link Input Mode Removed -->
 
                         <!-- Text Input -->
-                        <div class="input-mode hidden" id="mode-text">
+                        <div class="input-mode hidden" id="mode-text" style="flex-direction: column; gap: 1rem;">
                             <textarea class="ingest-textarea"
                                 placeholder="// PASTE RAW TEXT OR NOTES HERE..."></textarea>
+                            <button id="process-text-btn" class="cta-button"
+                                style="border: 1px solid var(--text-white); background: transparent; color: var(--text-white); padding: 0.5rem 2rem;">
+                                PROCESS <i data-lucide="arrow-right" style="display:inline; width:16px;"></i>
+                            </button>
                         </div>
                     </div>
 
@@ -283,7 +284,7 @@
             <button class="close-modal settings-close">&times;</button>
 
             <div class="settings-header">
-                <i data-lucide="cpu" class="settings-icon"></i>
+                <i data-lucide="settings" class="settings-icon"></i>
                 <h3 class="settings-title">SELECT MODEL PROTOCOL</h3>
             </div>
 

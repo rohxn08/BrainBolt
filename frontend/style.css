@@ -1126,6 +1126,23 @@ h1 {
     /* 4 Column Grid */
     gap: 1rem;
     margin-top: 1rem;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 0.5rem; /* Space for scrollbar */
+}
+
+/* Custom Scrollbar for Model Grid */
+.model-grid::-webkit-scrollbar {
+    width: 6px;
+}
+
+.model-grid::-webkit-scrollbar-track {
+    background: #111;
+}
+
+.model-grid::-webkit-scrollbar-thumb {
+    background: var(--primary-red);
+    border-radius: 3px;
 }
 
 .model-card {
