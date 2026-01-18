@@ -21,27 +21,22 @@ class ImageIngestor(BaseIngestor):
             logger.error(f"Image file not found: {source}")
             return ""
 
-        
-        project_root = os.getcwd() 
-        isolated_python = os.path.join(project_root, ".venv_ocr", "Scripts", "python.exe")
-        
-        
-        script_path = os.path.join(project_root, "src", "tools", "ocr_isolated.py")
-
-        if not os.path.exists(isolated_python):
-             # Fallback if venv not found (e.g. in some deployment), try system python or error
-             logger.error("Isolated OCR environment not found at .venv_ocr")
-             return "Error: OCR environment missing."
-
         try:
-            logger.info(f"Running OCR on {source}...")
-            process = subprocess.run(
-                [isolated_python, script_path, source],
-                capture_output=True,
-                text=True,
-                check=True
-            )
-            text = process.stdout.strip()
+            from paddleocr import PaddleOCR
+            # Initialize PaddleOCR (english, use_angle_cls=False to be safe)
+            # We lazy load this because it's heavy
+            ocr = PaddleOCR(use_angle_cls=False, lang='en', show_log=False)
+            
+            logger.info(f"Running direct PaddleOCR on {source}...")
+            result = ocr.ocr(source, cls=False)
+            
+            full_text = []
+            if result and result[0]:
+                for line in result[0]:
+                    text = line[1][0]
+                    full_text.append(text)
+            
+            text = " ".join(full_text)
             
             # If OCR result is too sparse (likely a diagram/chart), use Vision Model
             if len(text) < 50:
@@ -50,12 +45,10 @@ class ImageIngestor(BaseIngestor):
                 
             return text
 
-        except subprocess.CalledProcessError as e:
-            logger.error(f"OCR failed: {e.stderr}")
-            return f"Error extracting text: {e.stderr}"
         except Exception as e:
-            logger.error(f"Unexpected error in OCR ingestor: {e}")
-            return ""
+            logger.error(f"OCR failed: {e}")
+            # Fallback to Vision Model on error as well
+            return self._analyze_with_gemini(source)
 
     def _analyze_with_gemini(self,image_path:str)->str:
         try:
