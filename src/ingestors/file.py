@@ -1,6 +1,6 @@
 import logging
 import os
-from pypdf import PdfReader
+
 from .base import BaseIngestor
 
 logger = logging.getLogger(__name__)
@@ -34,11 +34,14 @@ class FileIngestor(BaseIngestor):
             return f"Error reading file: {str(e)}"
 
     def _read_pdf(self, path: str) -> str:
+        # Replaced pypdf with fitz
+        import fitz
         text = ""
         try:
-            reader = PdfReader(path)
-            for page in reader.pages:
-                text += page.extract_text() + "\n"
+            doc = fitz.open(path)
+            for page in doc:
+                text += page.get_text() + "\n"
+            doc.close()
             return text
         except Exception as e:
             logger.error(f"Failed to parse PDF: {e}")
