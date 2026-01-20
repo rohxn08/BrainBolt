@@ -48,11 +48,12 @@ quiz_generator = None
 # -----------------
 class InitRequest(BaseModel):
     api_key: str
-    model_name: str = "gemini-2.0-flash"
+    model_name: str = "gemini-2.5-flash"
 
 class ProcessRequest(BaseModel):
     source_path: str
     mode: str  # "summarize" or "quiz"
+    model_name: Optional[str] = "gemini-2.5-flash"  # Added model_name
     # Summarizer specific
     summary_type: Optional[str] = "concise"
     # Quiz specific
@@ -64,26 +65,6 @@ class ProcessRequest(BaseModel):
 # -----------------
 TEMP_DIR = os.path.join(os.getcwd(), "temp")
 os.makedirs(TEMP_DIR, exist_ok=True)
-
-def read_file_content(file_path: str) -> str:
-    """
-    Simple helper to read text from uploaded file.
-    For a real 'Universal Ingestor', this would use your `src.ingestors` logic
-    to parse PDF, Images, etc.
-    """
-    try:
-        # Detect if it's a URL (for simplicity in this demo, though frontend handles distinction)
-        if file_path.startswith("http"):
-            # Use SearchIngestor or similar for URLs
-            ingestor = SearchIngestor()
-            return ingestor.load(file_path) # Treating URL as query/link
-
-        # If local file
-        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
-            return f.read()
-    except Exception as e:
-        logger.error(f"Error reading source: {e}")
-        return ""
 
 # -----------------
 # API ENDPOINTS
@@ -148,32 +129,70 @@ async def upload_file(file: UploadFile = File(...)):
 async def process_content(request: ProcessRequest):
     """
     Main processing endpoint for Summarization and Quiz.
+    Uses MultiModalRAGProcessor for context-aware processing.
     """
     try:
-        # 1. Extract Content
-        # In a robust app, you'd use your specific Ingestor classes here based on file extension
-        text_content = read_file_content(request.source_path)
+        from src.ingestors.file import FileIngestor
+        from src.processors.multimodal_rag import MultiModalRAGProcessor
         
-        if not text_content:
-            raise HTTPException(status_code=400, detail="Could not extract text from source")
-
-        # 2. Route to Processor
-        if request.mode == "summarize":
-            if not summarizer:
-                raise HTTPException(status_code=500, detail="Summarizer not initialized")
+        source_path = request.source_path
+        
+        # 1. Ingest Data (Text + Images)
+        ingestor = None
+        ext = os.path.splitext(source_path)[1].lower()
+        
+        if source_path.startswith("http"):
+            if "youtube.com" in source_path or "youtu.be" in source_path:
+                from src.ingestors.youtube import YouTubeIngestor
+                ingestor = YouTubeIngestor()
+            else:
+                ingestor = SearchIngestor()
+        elif ext in ['.jpg', '.jpeg', '.png', '.bmp']:
+            from src.ingestors.image import ImageIngestor
+            # Pass model_name to ImageIngestor
+            ingestor = ImageIngestor(model_name=request.model_name) 
+        else:
+            ingestor = FileIngestor()
             
-            result = summarizer.summarize(
-                text=text_content,
+        data = ingestor.load_multimodal(source_path)
+        
+        if not data or (not data.get("text_pages") and not data.get("images")):
+             raise HTTPException(status_code=400, detail="Could not extract content from source")
+
+        # 2. Initialize RAG Processor with selected model
+        rag_processor = MultiModalRAGProcessor(model_name=request.model_name)
+        ingest_status = rag_processor.ingest_data(data)
+        logger.info(f"RAG Ingestion Status: {ingest_status}")
+
+        # 3. Route to Processor
+        if request.mode == "summarize":
+            # Re-instantiate summarizer to ensure correct model is used per request
+            # This avoids race conditions with globals and ensures consistency
+            current_summarizer = SummarizerProcessor(model_name=request.model_name)
+            
+            # Pass the RAG processor to the summarizer
+            result = current_summarizer.summarize(
+                rag_processor=rag_processor,
                 summary_type=request.summary_type
             )
             return {"result": result}
 
         elif request.mode == "quiz":
-            if not quiz_generator:
-                raise HTTPException(status_code=500, detail="Quiz Generator not initialized")
+            # Re-instantiate quiz generator for consistency
+            current_quiz_generator = QuizProcessor(model_name=request.model_name)
             
-            questions = quiz_generator.generate_quiz(
-                text=text_content,
+            # For now, Quiz Generator uses raw text.
+            # We reconstruct text from the ingested pages.
+            full_text = ""
+            for page in data.get("text_pages", []):
+                full_text += f"{page.get('text', '')}\n\n"
+            
+            if not full_text.strip():
+                 # Fallback if only images?
+                 full_text = "Analysis of the provided images revealed no directly extractable text for quiz generation."
+
+            questions = current_quiz_generator.generate_quiz(
+                text=full_text,
                 num_questions=request.num_questions,
                 difficulty=request.difficulty
             )
