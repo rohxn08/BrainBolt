@@ -5,7 +5,7 @@ from langchain_core.messages import HumanMessage
 logger = logging.getLogger(__name__)
 
 class SummarizerProcessor:
-    def __init__(self, model_name="gemini-2.0-flash"):
+    def __init__(self, model_name="gemini-2.5flash"):
         """
         Initialize the Summarizer Processor.
         """
@@ -26,16 +26,28 @@ class SummarizerProcessor:
             return "Error: No content ingested. Please ingest a file or link first."
 
         # 2. Retrieve Context
-        # We query for a broad overview to capture the essence
+        # Dynamic 'k' selection based on summary type (Level 1 Optimization)
+        # Concise/Executive = Less context needed (Focus on main points)
+        # Detailed/Technical = More context needed
+        k_map = {
+            "concise": 5,
+            "executive": 5,
+            "bullet_points": 7,
+            "educational": 7,
+            "detailed": 10,
+            "technical_deep_dive": 10,
+            "exam_ready": 8
+        }
+        k_val = k_map.get(summary_type, 7) # Default to 7
+        
         query = "comprehensive overview of the main content, key topics, and visual details"
         
         try:
             # Embed the broad query using the RAG processor's embedding method
             query_emb = rag_processor.embed_text(query)
             
-            # Fetch top 15 chunks to get good coverage of the document
-            # We use a higher 'k' here because we want a broad summary, not a specific answer
-            results = rag_processor.vector_store.similarity_search_by_vector(query_emb, k=15)
+            # Fetch top k chunks
+            results = rag_processor.vector_store.similarity_search_by_vector(query_emb, k=k_val)
         except Exception as e:
             logger.error(f"Retrieval failed: {e}")
             return f"Error retrieving context: {str(e)}"
@@ -91,25 +103,25 @@ class SummarizerProcessor:
         # 4. Build Multimodal Message
         content = []
         
-        # System/Intro Prompt
+        # System/Intro Prompt (Level 3 Optimization: Simplified)
         intro_prompt = f"""
-You are BrainBolt's advanced AI summarization assistant. 
-You are processing fragments retrieved from a larger document (containing text and images).
-
-Your task is to generate a **{summary_type}** summary.
+Task: Generate a {summary_type} summary from the retrieved context.
 
 GUIDELINES:
 {instructions}
 
-GENERAL RULES:
-- Synthesize information from both the text excerpts and the images provided below.
-- Use professional yet accessible language.
-- Format the output in clean Markdown.
-- Do NOT start with phrases like "Here is the summary". Just dive straight into the content.
+RULES:
+- Synthesize information from text and images.
+- Use clean Markdown.
+- No intro phrases like "Here is the summary".
 """
         content.append({"type": "text", "text": intro_prompt})
 
         # Append Text and Images from Retrieval
+        # Level 5 Optimization: Token Budgeting via Image Capping
+        MAX_IMAGES = 2 
+        image_count = 0
+        
         current_text_block = ""
         
         for doc in results:
@@ -120,6 +132,10 @@ GENERAL RULES:
                 current_text_block += f"\n[Text Page {page}]: {doc.page_content}\n"
             
             elif doc_type == "image":
+                # Only include image if budget allows
+                if image_count >= MAX_IMAGES:
+                    continue
+                    
                 # Flush pending text first so order is preserved relative to images
                 if current_text_block:
                     content.append({"type": "text", "text": current_text_block})
@@ -135,6 +151,7 @@ GENERAL RULES:
                         "type": "image_url", 
                         "image_url": {"url": f"data:image/png;base64,{b64_str}"}
                     })
+                    image_count += 1
 
         # Flush any remaining text after the loop
         if current_text_block:
