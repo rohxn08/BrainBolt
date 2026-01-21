@@ -10,7 +10,7 @@ from langchain_core.messages import HumanMessage
 logger = logging.getLogger(__name__)
 
 class ImageIngestor(BaseIngestor):
-    def __init__(self,model_name="gemini-2.0-flash"):
+    def __init__(self,model_name="gemini-2.5-flash"):
         self.llm=ChatGoogleGenerativeAI(model=model_name)
     def load(self, source: str) -> str:
         """

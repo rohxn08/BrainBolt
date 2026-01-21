@@ -41,14 +41,20 @@ class SearchIngestor(BaseIngestor):
         logger.info(f"Multimodal Web Search: {query}")
         
         try:
-            # 1. Get URLs
-            search_results = self.wrapper.results(query, max_results=self.num_results)
-            urls = [res['link'] for res in search_results]
+        
+            # 1. Get URLs (Smart Detection: Direct Link vs Search Query)
+            urls = []
+            if query.startswith("http://") or query.startswith("https://"):
+                logger.info("Direct Link functionality detected. Skipping Search.")
+                urls = [query]
+            else:
+                search_results = self.wrapper.results(query, max_results=self.num_results)
+                urls = [res['link'] for res in search_results]
             
             if not urls:
                 return {"text_pages": [], "images": []}
 
-            # 2. Load Content per URL
+            # 2. Load and Clean Content per URL
             result_pages = []
             
             # We load individually to keep them separate in RAG context
@@ -57,8 +63,40 @@ class SearchIngestor(BaseIngestor):
                     loader = WebBaseLoader([url], header_template={
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
                     })
+                    
+                    # Intercept the scrape to clean it before getting text
                     docs = loader.load()
-                    text = "\n".join([d.page_content for d in docs])
+                    
+                    # IMPROVED CLEANING LOGIC using BeautifulSoup attached to the loader
+                    # (WebBaseLoader uses BS4 under the hood, but often returns everything.
+                    # We can re-parse the page_content if it's raw HTML, but usually it returns text.
+                    # Best approach: Use requests + BS4 directly or refining the loader's output is limited.
+                    # Let's simple-clean the text or re-fetch for better control.
+                    # Given we have the docs, let's try to clean the extracted text or use a better parser.)
+                    
+                    # PROPOSED FIX: Custom scraping for high quality text
+                    import requests
+                    from bs4 import BeautifulSoup
+                    
+                    resp = requests.get(url, headers={
+                        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' 
+                                      'AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+                    }, timeout=10)
+                    
+                    soup = BeautifulSoup(resp.content, 'html.parser')
+                    
+                    # 1. Remove Clutter
+                    for tag in soup(['nav', 'header', 'footer', 'aside', 'script', 'style', 'noscript', 'form', 'iframe']):
+                        tag.decompose()
+                        
+                    # 2. Focus on Main Content (Heuristic)
+                    main_content = soup.find('main') or soup.find('article') or soup.find(id='content') or soup.find(class_='content') or soup.body
+                    
+                    if main_content:
+                        text = main_content.get_text(separator='\n', strip=True)
+                    else:
+                        text = soup.get_text(separator='\n', strip=True)
+
                     
                     if text.strip():
                         # Append URL to text for reference
