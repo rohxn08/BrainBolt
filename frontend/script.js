@@ -96,11 +96,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // 1.x Back Button
     ingestBack.addEventListener('click', (e) => {
         e.stopPropagation();
+
+        // State 3: Active Input -> State 2: Grid
         if (!ingestActive.classList.contains('hidden')) {
+            console.log("Back: Active -> Grid");
             ingestTabs.classList.add('hidden');
             ingestActive.classList.add('hidden');
             ingestGrid.classList.remove('hidden');
-        } else if (!ingestGrid.classList.contains('hidden')) {
+            // Reset contents
+            document.querySelectorAll('.input-mode').forEach(el => el.classList.add('hidden'));
+        }
+        // State 2: Grid -> State 1: Initial
+        else if (!ingestGrid.classList.contains('hidden')) {
+            console.log("Back: Grid -> Initial");
             ingestGrid.classList.add('hidden');
             ingestInitial.classList.remove('hidden');
             ingestBack.classList.add('hidden');
@@ -111,19 +119,84 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.grid-tile').forEach(tile => {
         tile.addEventListener('click', () => {
             const type = tile.dataset.type;
+
+            // Transition: Grid -> Active
             ingestGrid.classList.add('hidden');
             ingestTabs.classList.remove('hidden');
             ingestActive.classList.remove('hidden');
 
-            // Basic UI switch for tabs (Files default)
-            document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+            // Elements
             const filesTab = document.querySelector('.tab-item[data-tab="files"]');
-            if (filesTab) filesTab.classList.add('active');
+            const textTab = document.querySelector('.tab-item[data-tab="text"]');
+            const linksTab = document.querySelector('.tab-item[data-tab="links"]');
 
-            document.getElementById('mode-files').classList.remove('hidden');
-            document.getElementById('mode-links').classList.add('hidden');
-            if (type === 'weblink' || type === 'search') {
-                document.querySelector('.tab-item[data-tab="links"]').click();
+            const modeFiles = document.getElementById('mode-files');
+            const modeText = document.getElementById('mode-text');
+            const modeLinks = document.getElementById('mode-links');
+            const modeYoutube = document.getElementById('mode-youtube');
+
+            // Reset All Tabs & Modes first
+            [filesTab, textTab, linksTab].forEach(t => {
+                if (t) { t.style.display = 'none'; t.classList.remove('active'); }
+            });
+            [modeFiles, modeText, modeLinks, modeYoutube].forEach(m => {
+                if (m) m.classList.add('hidden');
+            });
+
+            // Reset all custom overrides first
+            if (filesTab) delete filesTab.dataset.targetMode;
+
+            // Logic per Type
+            if (type === 'documents') {
+                // "docs --- documents and text"
+                if (filesTab) {
+                    filesTab.style.display = 'block';
+                    filesTab.innerText = '[DOCUMENTS]';
+                    filesTab.classList.add('active'); // Default
+                }
+                if (textTab) textTab.style.display = 'block';
+
+                // Show Default Mode
+                modeFiles.classList.remove('hidden');
+            }
+            else if (type === 'visuals') {
+                // "visuals-- only images"
+                if (filesTab) {
+                    filesTab.style.display = 'block';
+                    filesTab.innerText = '[IMAGES]';
+                    filesTab.classList.add('active'); // Default
+                }
+                // Show Default Mode
+                modeFiles.classList.remove('hidden');
+            }
+            else if (type === 'search') {
+                if (filesTab) {
+                    filesTab.style.display = 'block';
+                    filesTab.innerText = '[QUERY]';
+                    filesTab.classList.add('active'); // Default to Query for Search
+                    filesTab.dataset.targetMode = 'search-query'; // custom indicator
+                }
+                if (textTab) {
+                    textTab.style.display = 'none';
+                }
+                if (linksTab) {
+                    linksTab.style.display = 'block';
+                    linksTab.innerText = '[LINKS]';
+                    linksTab.classList.remove('active');
+                }
+                // Show Query Mode by default
+                document.getElementById('mode-search-query').classList.remove('hidden');
+            }
+            else if (type === 'youtube') {
+                // "youtube - only url input"
+                if (filesTab) filesTab.style.display = 'none';
+                if (textTab) textTab.style.display = 'none';
+                if (linksTab) linksTab.style.display = 'none';
+
+                ingestTabs.classList.add('hidden'); // No tabs needed for single mode
+
+                // Show Default Mode
+                modeYoutube.classList.remove('hidden');
             }
         });
     });
@@ -135,8 +208,18 @@ document.addEventListener('DOMContentLoaded', () => {
             tab.classList.add('active');
 
             const target = tab.dataset.tab;
+            // Hide all modes
             document.querySelectorAll('.input-mode').forEach(m => m.classList.add('hidden'));
-            document.getElementById(`mode-${target}`).classList.remove('hidden');
+
+            // Show specific mode
+            // Check if tab has a special target override (like Query -> mode-search-query)
+            let modeId = `mode-${target}`;
+            if (tab.dataset.targetMode) {
+                modeId = `mode-${tab.dataset.targetMode}`;
+            }
+
+            const modeEl = document.getElementById(modeId);
+            if (modeEl) modeEl.classList.remove('hidden');
         });
     });
 
@@ -191,6 +274,103 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+
+    // Search Query Processing
+    const processQueryBtn = document.getElementById('process-query-btn');
+    if (processQueryBtn) {
+        processQueryBtn.addEventListener('click', () => {
+            const inputField = document.getElementById('search-query-field');
+            const query = inputField.value.trim();
+
+            if (query.length === 0) {
+                alert("Please enter a search query.");
+                return;
+            }
+
+            // Set state directly
+            currentSourcePath = query; // Backend will treat non-file/non-url as Search Query
+            isFileUploaded = true;
+
+            // Visual Feedback
+            processQueryBtn.innerHTML = 'SEARCHING... <i data-lucide="loader-2" class="spin" style="display:inline; width:16px;"></i>';
+            lucide.createIcons();
+            ingestCard.style.borderColor = "#00FF00";
+
+            setTimeout(() => {
+                processQueryBtn.innerHTML = 'READY <i data-lucide="check" style="display:inline; width:16px;"></i>';
+                lucide.createIcons();
+                setTimeout(() => {
+                    processQueryBtn.innerHTML = 'SEARCH <i data-lucide="search" style="display:inline; width:16px;"></i>';
+                    lucide.createIcons();
+                }, 2000);
+            }, 1000);
+        });
+    }
+
+    // Link Input Processing
+    const processLinkBtn = document.getElementById('process-link-btn');
+    if (processLinkBtn) {
+        processLinkBtn.addEventListener('click', () => {
+            const inputField = document.getElementById('link-input-field');
+            const url = inputField.value.trim();
+
+            if (url.length === 0) {
+                alert("Please enter a valid URL.");
+                return;
+            }
+
+            // Set state directly
+            currentSourcePath = url;
+            isFileUploaded = true;
+
+            // Visual Feedback
+            processLinkBtn.innerHTML = 'LINKED <i data-lucide="check" style="display:inline; width:16px;"></i>';
+            ingestCard.style.borderColor = "#00FF00";
+
+            setTimeout(() => {
+                processLinkBtn.innerHTML = 'PROCESS <i data-lucide="arrow-right" style="display:inline; width:16px;"></i>';
+            }, 1000);
+        });
+    }
+
+    // YouTube Input Processing
+    const processYoutubeBtn = document.getElementById('process-youtube-btn');
+    if (processYoutubeBtn) {
+        processYoutubeBtn.addEventListener('click', () => {
+            const inputField = document.getElementById('youtube-input-field');
+            const rawUrl = inputField.value.trim();
+            const urlLower = rawUrl.toLowerCase();
+
+            console.log("YouTube Extract Clicked for:", rawUrl);
+
+            // Case-insensitive check
+            if (rawUrl.length === 0 || (!urlLower.includes("youtube.com") && !urlLower.includes("youtu.be"))) {
+                alert("Please enter a valid YouTube URL (e.g., youtube.com/watch?v=...)");
+                return;
+            }
+
+            // Set state 
+            currentSourcePath = rawUrl; // Use original casing for backend
+            isFileUploaded = true;
+
+            // Visual Feedback
+            processYoutubeBtn.innerHTML = 'EXTRACTING... <i data-lucide="loader-2" class="spin" style="display:inline; width:16px;"></i>';
+            lucide.createIcons();
+            ingestCard.style.borderColor = "#ff0000";
+
+            // We can trigger an optional pre-fetch here if we wanted to validate instantly, 
+            // but for now we just verify it sets the path correctly for the RAG step.
+
+            setTimeout(() => {
+                processYoutubeBtn.innerHTML = 'READY <i data-lucide="check" style="display:inline; width:16px;"></i>';
+                lucide.createIcons();
+                setTimeout(() => {
+                    processYoutubeBtn.innerHTML = 'EXTRACT <i data-lucide="youtube" style="display:inline; width:16px;"></i>';
+                    lucide.createIcons();
+                }, 2000);
+            }, 1500);
+        });
+    }
 
     // =========================================
     // 2. SUMMARIZER LOGIC (REAL API)
