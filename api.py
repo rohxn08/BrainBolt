@@ -141,18 +141,26 @@ async def process_content(request: ProcessRequest):
         ingestor = None
         ext = os.path.splitext(source_path)[1].lower()
         
-        if source_path.startswith("http"):
+        if os.path.exists(source_path):
+            # It is a local file
+            if ext in ['.jpg', '.jpeg', '.png', '.bmp']:
+                from src.ingestors.image import ImageIngestor
+                ingestor = ImageIngestor(model_name=request.model_name) 
+            else:
+                ingestor = FileIngestor()
+        
+        elif source_path.startswith("http"):
+            # It is a URL
             if "youtube.com" in source_path or "youtu.be" in source_path:
                 from src.ingestors.youtube import YouTubeIngestor
                 ingestor = YouTubeIngestor()
             else:
                 ingestor = SearchIngestor()
-        elif ext in ['.jpg', '.jpeg', '.png', '.bmp']:
-            from src.ingestors.image import ImageIngestor
-            # Pass model_name to ImageIngestor
-            ingestor = ImageIngestor(model_name=request.model_name) 
+        
         else:
-            ingestor = FileIngestor()
+            # It is a search query or raw text
+            # We treat it as a search query for the SearchIngestor
+            ingestor = SearchIngestor()
             
         data = ingestor.load_multimodal(source_path)
         
