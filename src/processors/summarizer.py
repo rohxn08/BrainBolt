@@ -1,17 +1,18 @@
 import logging
 from langchain_google_genai import ChatGoogleGenerativeAI
+from typing import Any
 from langchain_core.messages import HumanMessage
 
 logger = logging.getLogger(__name__)
 
 class SummarizerProcessor:
-    def __init__(self, model_name="gemini-2.5flash"):
+    def __init__(self, model_name="gemini-2.5-flash"):
         """
         Initialize the Summarizer Processor.
         """
         self.llm = ChatGoogleGenerativeAI(model=model_name, temperature=0.3)
 
-    def summarize(self, rag_processor, summary_type: str = "concise"):
+    def summarize(self, rag_processor: Any, summary_type: str = "concise"):
         """
         Generates a summary by retrieving context from the provided MultiModalRAGProcessor.
         
@@ -35,15 +36,26 @@ class SummarizerProcessor:
             "bullet_points": 7,
             "educational": 7,
             "detailed": 10,
-            "technical_deep_dive": 10,
+            "technical_deep_dive": 12,
             "exam_ready": 8
         }
         k_val = k_map.get(summary_type, 7) # Default to 7
         
-        query = "comprehensive overview of the main content, key topics, and visual details"
+        # Dynamic Query Selection (Level 2 Optimization)
+        # Tailor the retrieval query to what matters for the summary type
+        query_map = {
+            "concise": "overview of the main content and core message",
+            "executive": "key outcomes, risks, benefits, and strategic implications",
+            "bullet_points": "list of key takeaways, main topics, and important facts",
+            "educational": "definitions, step-by-step explanations, and fundamental concepts",
+            "detailed": "comprehensive details, nuance, examples, and specifics",
+            "technical_deep_dive": "technical specifications, implementation details, methodologies, and data",
+            "exam_ready": "definitions, formulas, dates, and testable facts"
+        }
+        query = query_map.get(summary_type, "comprehensive overview of the main content, key topics, and visual details")
         
         try:
-            # Embed the broad query using the RAG processor's embedding method
+            # Embed the tailored query using the RAG processor's embedding method
             query_emb = rag_processor.embed_text(query)
             
             # Fetch top k chunks
@@ -144,7 +156,7 @@ RULES:
                 # Add Image
                 img_id = doc.metadata.get("image_id")
                 # Ensure the image data exists in the RAG store
-                if img_id and img_id in rag_processor.image_data_store:
+                if img_id and hasattr(rag_processor, 'image_data_store') and rag_processor.image_data_store and img_id in rag_processor.image_data_store:
                     b64_str = rag_processor.image_data_store[img_id]
                     content.append({"type": "text", "text": f"\n[Image from Page {page}]:\n"})
                     content.append({
