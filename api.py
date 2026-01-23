@@ -189,18 +189,9 @@ async def process_content(request: ProcessRequest):
             # Re-instantiate quiz generator for consistency
             current_quiz_generator = QuizProcessor(model_name=request.model_name)
             
-            # For now, Quiz Generator uses raw text.
-            # We reconstruct text from the ingested pages.
-            full_text = ""
-            for page in data.get("text_pages", []):
-                full_text += f"{page.get('text', '')}\n\n"
-            
-            if not full_text.strip():
-                 # Fallback if only images?
-                 full_text = "Analysis of the provided images revealed no directly extractable text for quiz generation."
-
+            # Retrieve context from RAG instead of passing raw text
             questions = current_quiz_generator.generate_quiz(
-                text=full_text,
+                rag_processor=rag_processor,
                 num_questions=request.num_questions,
                 difficulty=request.difficulty
             )

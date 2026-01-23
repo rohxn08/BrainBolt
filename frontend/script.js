@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentSourcePath = null; // Store backend path
     let isSystemUnlocked = false;
     let currentApiKey = null;
+    let currentModel = "gemini-2.5-flash"; // Default Model
 
     // Elements
     const ingestCard = document.querySelector('.card-ingest');
@@ -410,7 +411,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     body: JSON.stringify({
                         source_path: currentSourcePath,
                         mode: "summarize",
-                        summary_type: mode
+                        summary_type: mode,
+                        model_name: currentModel // Pass selected model
                     })
                 });
 
@@ -491,7 +493,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     source_path: currentSourcePath,
                     mode: "quiz",
                     num_questions: quizConfig.count,
-                    difficulty: quizConfig.difficulty
+                    difficulty: quizConfig.difficulty,
+                    model_name: currentModel // Pass selected model
                 })
             });
 
@@ -586,12 +589,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     lockIcon.style.color = "#FF8C00";
                     lucide.createIcons();
 
+                    currentApiKey = key;
+
                     // Call Backend Init
                     try {
                         const res = await fetch(`${API_BASE_URL}/api/init`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ api_key: key, model_name: "gemini-2.0-flash" })
+                            body: JSON.stringify({ api_key: key, model_name: currentModel })
                         });
 
                         if (res.ok) {
@@ -628,6 +633,10 @@ document.addEventListener('DOMContentLoaded', () => {
                                             btn.classList.add('active');
                                             btn.style.borderColor = "#00FF00"; // Immediate visual feedback
 
+                                            // Model Selection Logic (Local State)
+                                            currentModel = modelName;
+                                            console.log("Model saved locally:", currentModel);
+
                                             // Helper to close modal
                                             const closeModal = () => {
                                                 setTimeout(() => {
@@ -639,7 +648,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                                 }, 500);
                                             };
 
-                                            // Switch Active Model
+                                            // Switch Active Model on Backend (Optional but good for persistent session)
                                             if (currentApiKey) {
                                                 console.log("Switching model to:", modelName);
                                                 try {
@@ -648,7 +657,6 @@ document.addEventListener('DOMContentLoaded', () => {
                                                         headers: { 'Content-Type': 'application/json' },
                                                         body: JSON.stringify({ api_key: currentApiKey, model_name: modelName })
                                                     });
-                                                    // We close regardless of success/fail to keep UI responsive
                                                 } catch (err) {
                                                     console.error("Model switch API failed", err);
                                                 }
@@ -696,7 +704,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Model Card Selection
+    // Model Card Selection (For initial static cards if any)
     modelCards.forEach(card => {
         card.addEventListener('click', () => {
             if (card.classList.contains('disabled')) return;
