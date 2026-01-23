@@ -1,5 +1,4 @@
 python-dotenv
-pypdf
 google-search-results
 jupyter
 pandas
@@ -11,6 +10,16 @@ langchain-google-genai==4.1.3
 google-generativeai==0.8.5
 beautifulsoup4
 duckduckgo-search
-paddleocr
-paddlepaddle
-
+fastapi
+uvicorn
+python-multipart
+torch
+pymupdf
+transformers
+scikit-learn
+faiss-cpu
+numpy
+Pillow
+paddleocr>=2.7.3
+paddlepaddle>=2.6.0
+youtube-transcript-api==1.2.3
