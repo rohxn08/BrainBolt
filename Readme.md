@@ -77,6 +77,7 @@ To handle large datasets without hallucination, we use a RAG architecture.
 
 ## 5. Performance Metrics
 
+### 5.1 Before Vector DB Integration
 Below are the benchmarked performance metrics for the **Summarizer Engine** across various input types. All tests were conducted on a standard broadband connection.
 
 | Input Type | Task | Total Latency (ms) | TTFT (ms) | Retrieval Time (ms) | Throughput (T/s) |
@@ -93,6 +94,9 @@ Below are the benchmarked performance metrics for the **Summarizer Engine** acro
 1.  **Retrieval Bottleneck:** For web links and search, the retrieval phase (scraping + embedding) dominates the total time (~54s for links).
 2.  **High Throughput for OCR:** Text-heavy images showed an anomaly high throughput (1,850 T/s), likely due to highly efficient batch processing of OCR tokens alongside low generation output.
 3.  **Video Efficiency:** YouTube summarization is surprisingly fast (~26s), comparable to raw text, as transcripts are lightweight compared to scraping heavy HTML pages.
+
+### 5.2 After Vector DB Integration
+*(Benchmarks pending optimization and database integration)*
 
 ---
 
