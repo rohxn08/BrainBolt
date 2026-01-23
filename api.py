@@ -1,6 +1,9 @@
+
 import os
 import shutil
 import logging
+import time
+import uuid
 from typing import Optional, List
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 from fastapi.staticfiles import StaticFiles
@@ -9,19 +12,17 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
+
 load_dotenv()
 
 # Import existing logic
-# Assuming src is in the python path
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), "src"))
 
 from src.processors.summarizer import SummarizerProcessor
 from src.processors.quiz_generator import QuizProcessor
 from src.ingestors.search import SearchIngestor
-from src.utils import list_available_models
-# (Add other ingestors as needed, e.g. PDF/Image if you have them,
-# or simply treat 'source_path' as text for now if it's a raw file path)
+import src.utils as utils # For list_available_models
 
 # Setup Logging
 logging.basicConfig(level=logging.INFO)
@@ -32,14 +33,13 @@ app = FastAPI()
 # CORS configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development convenience
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Global instances (lazy loaded or initialized via /api/init)
-# Global instances (lazy loaded or initialized via /api/init)
+# Global instances
 summarizer = None
 quiz_generator = None
 
@@ -53,7 +53,7 @@ class InitRequest(BaseModel):
 class ProcessRequest(BaseModel):
     source_path: str
     mode: str  # "summarize" or "quiz"
-    model_name: Optional[str] = "gemini-2.5-flash"  # Added model_name
+    model_name: Optional[str] = "gemini-2.5-flash"
     # Summarizer specific
     summary_type: Optional[str] = "concise"
     # Quiz specific
@@ -74,19 +74,22 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 async def init_session(request: InitRequest):
     """
     Initialize session with API Key.
-    In a real multi-user app, this would use sessions/cookies.
     """
     try:
         os.environ["GOOGLE_API_KEY"] = request.api_key
-        # Re-initialize processors with new key if needed
-        # (LangChain usually picks up env var automatically on instantiation,
-        # but re-instantiating ensures it)
         global summarizer, quiz_generator
         summarizer = SummarizerProcessor(model_name=request.model_name)
         quiz_generator = QuizProcessor(model_name=request.model_name)
         
-        # Get actual available models
-        available_models = list_available_models(request.api_key)
+        # Use utils.list_available_models directly if imported as module, 
+        # or call functional logic if available.
+        # Assuming list_available_models is in src/utils/__init__.py or similar
+        try:
+            available_models = utils.list_available_models(request.api_key)
+        except AttributeError:
+             # Fallback if function is not directly exposed in utils package
+             from src.utils import list_available_models
+             available_models = list_available_models(request.api_key)
         
         return {
             "status": "success", 
@@ -102,12 +105,9 @@ async def upload_file(file: UploadFile = File(...)):
     Handle file uploads.
     """
     try:
-        # Check file size (Read into memory to check size - efficient for small limits like 10MB)
-        # Alternatively, seek to end to get size if supported, or read chunks.
-        # Simple method for FastAPI UploadFile:
         file.file.seek(0, 2)
         file_size = file.file.tell()
-        file.file.seek(0) # Reset cursor
+        file.file.seek(0)
         
         MAX_SIZE_MB = 10
         if file_size > MAX_SIZE_MB * 1024 * 1024:
@@ -159,7 +159,6 @@ async def process_content(request: ProcessRequest):
         
         else:
             # It is a search query or raw text
-            # We treat it as a search query for the SearchIngestor
             ingestor = SearchIngestor()
             
         data = ingestor.load_multimodal(source_path)
@@ -174,22 +173,15 @@ async def process_content(request: ProcessRequest):
 
         # 3. Route to Processor
         if request.mode == "summarize":
-            # Re-instantiate summarizer to ensure correct model is used per request
-            # This avoids race conditions with globals and ensures consistency
             current_summarizer = SummarizerProcessor(model_name=request.model_name)
-            
-            # Pass the RAG processor to the summarizer
             result = current_summarizer.summarize(
                 rag_processor=rag_processor,
                 summary_type=request.summary_type
             )
             return {"result": result}
-
+        
         elif request.mode == "quiz":
-            # Re-instantiate quiz generator for consistency
             current_quiz_generator = QuizProcessor(model_name=request.model_name)
-            
-            # Retrieve context from RAG instead of passing raw text
             questions = current_quiz_generator.generate_quiz(
                 rag_processor=rag_processor,
                 num_questions=request.num_questions,
@@ -205,13 +197,8 @@ async def process_content(request: ProcessRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# -----------------
-# STATIC MOUNT
-# -----------------
-# Mount the frontend directory to serve HTML/CSS/JS
 app.mount("/", StaticFiles(directory="frontend", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
-    # Allow running directly: python api.py
     uvicorn.run(app, host="0.0.0.0", port=8000)
