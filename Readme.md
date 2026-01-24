@@ -106,6 +106,9 @@ Below are the benchmarked performance metrics for the **Summarizer Engine** acro
 2.  **High Throughput for OCR:** Text-heavy images showed an anomaly high throughput (1,850 T/s), explained by the definition above (efficient batch processing of OCR tokens vs short generation).
 3.  **Video Efficiency:** YouTube summarization is surprisingly fast (~26s), comparable to raw text, as transcripts are lightweight compared to scraping heavy HTML pages.
 
+| ![Latency Breakdown](Retrieval%20vs%20generation.png) | ![BrainBolt Visualization](brainbolt%20visualization.png) |
+| :---: | :---: |
+
 ### 5.2 After Vector DB Integration
 *(Benchmarks pending optimization and database integration)*
 
