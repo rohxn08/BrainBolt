@@ -77,6 +77,15 @@ To handle large datasets without hallucination, we use a RAG architecture.
 
 ## 5. Performance Metrics
 
+### Measurement Methodology
+To ensure scientific rigor, metrics were captured using the following instrumentation:
+*   **TTFT (Time to First Token):** Measured from request dispatch → first token received from Gemini API.
+*   **Latency:** Measured as end-to-end wall-clock time.
+*   **Retrieval Time:** Measured independently (embedding + search) before LLM invocation.
+*   **Throughput:** Computed as `total output tokens ÷ generation time`.
+
+> **Note:** The evaluation scripts used to generate these metrics are intended for offline benchmarking and system analysis and are not part of the production request path.
+
 ### 5.1 Before Vector DB Integration
 Below are the benchmarked performance metrics for the **Summarizer Engine** across various input types. All tests were conducted on a standard broadband connection.
 
@@ -90,9 +99,11 @@ Below are the benchmarked performance metrics for the **Summarizer Engine** acro
 | **Web Link (Scrape)** | Summarize | 68,845 | 6,302 | 54,195 | 78.44 |
 | **YouTube Video** | Summarize | 26,129 | 7,352 | 14,385 | 16.81 |
 
+**Throughput Definition:** Throughput is measured as generated output tokens per second during the LLM generation phase only (excluding OCR and retrieval preprocessing). For OCR-heavy inputs, low generation length can result in unusually high throughput values.
+
 **Key Observations:**
 1.  **Retrieval Bottleneck:** For web links and search, the retrieval phase (scraping + embedding) dominates the total time (~54s for links).
-2.  **High Throughput for OCR:** Text-heavy images showed an anomaly high throughput (1,850 T/s), likely due to highly efficient batch processing of OCR tokens alongside low generation output.
+2.  **High Throughput for OCR:** Text-heavy images showed an anomaly high throughput (1,850 T/s), explained by the definition above (efficient batch processing of OCR tokens vs short generation).
 3.  **Video Efficiency:** YouTube summarization is surprisingly fast (~26s), comparable to raw text, as transcripts are lightweight compared to scraping heavy HTML pages.
 
 ### 5.2 After Vector DB Integration
