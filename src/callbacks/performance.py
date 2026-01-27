@@ -13,7 +13,7 @@ class PerformanceCallback(BaseCallbackHandler):
     def on_llm_start(self, serialized, messages, **kwargs):
         """Called when LLM starts processing."""
         self.start_time = time.perf_counter()
-        self.first_token_time = None # Reset
+        self.first_token_time = None 
         self.token_count = 0
         
     def on_llm_new_token(self, token: str, **kwargs):
