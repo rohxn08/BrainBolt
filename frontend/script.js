@@ -753,5 +753,54 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // =========================================
+    // 6. AUTO-UNLOCK CHECK (PORTFOLIO MODE)
+    // =========================================
+    async function checkAutoUnlock() {
+        // Only run auto-unlock if embedded in an iframe OR explicitly requesting portfolio mode
+        const isPortfolioMode = (window.self !== window.top) || (new URLSearchParams(window.location.search).get('portfolio') === 'true');
+
+        if (!isPortfolioMode) {
+            console.log("Standard mode: User must provide API Key.");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_BASE_URL}/api/status`);
+            if (res.ok) {
+                const data = await res.json();
+                if (data.configured) {
+                    console.log("System pre-configured! Auto-unlocking UI...");
+
+                    // We also need to send an empty init to actually instantiate the global summarizer/quiz objects on the backend 
+                    // using the backend's environment variables
+                    await fetch(`${API_BASE_URL}/api/init`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ api_key: null, model_name: currentModel })
+                    });
+
+                    isSystemUnlocked = true;
+
+                    // Visual changes
+                    if (apiKeyField) {
+                        apiKeyField.value = "•••••••••••••••••••••••••";
+                        apiKeyField.disabled = true;
+                    }
+                    if (lockIcon) {
+                        lockIcon.setAttribute('data-lucide', 'unlock');
+                        lockIcon.style.color = "#00FF00";
+                    }
+                    document.querySelectorAll('.locked').forEach(c => c.classList.remove('locked'));
+                    lucide.createIcons();
+                }
+            }
+        } catch (e) {
+            console.log("Auto-unlock check failed (normal if not pre-configured)");
+        }
+    }
+
+    // Run the check on load
+    checkAutoUnlock();
 
 });

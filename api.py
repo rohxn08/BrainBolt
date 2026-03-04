@@ -47,7 +47,7 @@ quiz_generator = None
 # DATA MODELS
 # -----------------
 class InitRequest(BaseModel):
-    api_key: str
+    api_key: Optional[str] = None
     model_name: str = "gemini-2.5-flash"
 
 class ProcessRequest(BaseModel):
@@ -70,26 +70,35 @@ os.makedirs(TEMP_DIR, exist_ok=True)
 # API ENDPOINTS
 # -----------------
 
+@app.get("/api/status")
+async def check_status():
+    """Check if the server already has an API key configured via environment variables."""
+    if os.getenv("GOOGLE_API_KEY"):
+        return {"configured": True}
+    return {"configured": False}
+
 @app.post("/api/init")
 async def init_session(request: InitRequest):
     """
     Initialize session with API Key.
     """
     try:
-        os.environ["GOOGLE_API_KEY"] = request.api_key
+        if request.api_key:
+            os.environ["GOOGLE_API_KEY"] = request.api_key
+            
+        api_key_to_use = os.getenv("GOOGLE_API_KEY")
+        if not api_key_to_use:
+            raise HTTPException(status_code=401, detail="API Key required")
+
         global summarizer, quiz_generator
         summarizer = SummarizerProcessor(model_name=request.model_name)
         quiz_generator = QuizProcessor(model_name=request.model_name)
         
-        # Use utils.list_available_models directly if imported as module, 
-        # or call functional logic if available.
-        # Assuming list_available_models is in src/utils/__init__.py or similar
         try:
-            available_models = utils.list_available_models(request.api_key)
+            available_models = utils.list_available_models(api_key_to_use)
         except AttributeError:
-             # Fallback if function is not directly exposed in utils package
              from src.utils import list_available_models
-             available_models = list_available_models(request.api_key)
+             available_models = list_available_models(api_key_to_use)
         
         return {
             "status": "success", 
