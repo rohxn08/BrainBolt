@@ -2,7 +2,8 @@
 document.addEventListener('DOMContentLoaded', () => {
 
     // Configuration
-    const API_BASE_URL = 'http://localhost:8000'; // Ensure your FastAPI backend runs here
+    // Use an empty string or dynamically fetch origin so it works correctly on local and Hugging Face servers
+    const API_BASE_URL = '';
 
     lucide.createIcons();
 
